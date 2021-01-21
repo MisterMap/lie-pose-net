@@ -1,0 +1,5 @@
+outs:
+- md5: 3ec11e4fe8a5124e47177873ae46b593.dir
+  size: 3077820897
+  nfiles: 18003
+  path: chess
