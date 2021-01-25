@@ -1,0 +1,24 @@
+train-pose-net:
+  cmd: python train.py --config configs/pose_net.yaml --out models/pose_net.pth --seed
+    1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
+  deps:
+  - path: train.py
+    md5: 8f6d3c266b20313672677b6fa6fdb525
+    size: 1718
+  params:
+    configs/pose_net.yaml:
+      model:
+        name: pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: pose_net_criterion
+        feature_dimension: 2048
+        drop_rate: 0.5
+        optimizer:
+          betas: 0.9 0.999
+  outs:
+  - path: models/pose_net.pth.ckpt
+    md5: 0120ddde7621c71cc4ea8e9894839c65
+    size: 268390884

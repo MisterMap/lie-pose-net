@@ -5,7 +5,7 @@ stages:
         deps:
             - train.py
         outs:
-            - models/pose_net.pth
+            - models/pose_net.pth.ckpt
         params:
             - configs/pose_net.yaml:
-                  - "*"
+                  - model

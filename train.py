@@ -39,7 +39,7 @@ data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_fo
                                     arguments.batch_size, arguments.num_workers)
 
 # Load parameters
-params = load_hparams_from_yaml(arguments.config)
+params = load_hparams_from_yaml(arguments.config).model
 print("Load model from params \n" + str(params))
 
 # Make model
