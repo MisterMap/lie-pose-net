@@ -1,35 +1,30 @@
 """
 Copyright (C) 2018 NVIDIA Corporation.  All rights reserved.
 Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
-"""
-
-"""
 implementation of PoseNet and MapNet networks 
 """
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.nn.init
+
+from .base_lightning_module import BaseLightningModule
 
 
-class PoseNet(nn.Module):
-    def __init__(self, feature_extractor, droprate=0.5, pretrained=True,
-                 feat_dim=2048):
-        super(PoseNet, self).__init__()
-        self.droprate = droprate
+class PoseNet(BaseLightningModule):
+    def __init__(self, parameters, feature_extractor, criterion):
+        super(PoseNet, self).__init__(parameters)
 
+        self.criterion = criterion
         # replace the last FC layer in feature extractor
         self.feature_extractor = feature_extractor
         self.feature_extractor.avgpool = nn.AdaptiveAvgPool2d(1)
-        fe_out_planes = self.feature_extractor.fc.in_features
-        self.feature_extractor.fc = nn.Linear(fe_out_planes, feat_dim)
+        feature_extractor_output_dimension = self.feature_extractor.fc.in_features
+        self.feature_extractor.fc = nn.Linear(feature_extractor_output_dimension, parameters.feature_dimension)
 
-        self.fc_xyz = nn.Linear(feat_dim, 3)
-        self.fc_wpqr = nn.Linear(feat_dim, 3)
+        self.final_fc = nn.Linear(parameters.feature_dimension, criterion.position_dimension)
 
         # initialize
-        if pretrained:
-            init_modules = [self.feature_extractor.fc, self.fc_xyz, self.fc_wpqr]
+        if parameters.feature_extractor.pretrained:
+            init_modules = [self.feature_extractor.fc, self.final_fc]
         else:
             init_modules = self.modules()
 
@@ -42,9 +37,15 @@ class PoseNet(nn.Module):
     def forward(self, x):
         x = self.feature_extractor(x)
         x = F.relu(x)
-        if self.droprate > 0:
-            x = F.dropout(x, p=self.droprate)
+        if self.hparams.drop_rate > 0:
+            x = F.dropout(x, p=self.hparams.drop_rate)
 
-        xyz = self.fc_xyz(x)
-        wpqr = self.fc_wpqr(x)
-        return torch.cat((xyz, wpqr), 1)
+        x = self.final_fc(x)
+        return x
+
+    def loss(self, batch):
+        image = batch["image"]
+        predicted_position = self.forward(image)
+        target_position = batch["position"]
+        loss = self.criterion(predicted_position, target_position)
+        return predicted_position, {"loss": loss}
