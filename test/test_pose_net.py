@@ -35,3 +35,7 @@ class TestPoseNet(unittest.TestCase):
     def test_training(self):
         trainer = pl.Trainer(logger=TensorBoardLogger("lightning_logs"), max_epochs=1, gpus=1)
         trainer.fit(self._model, self._data_module)
+
+    def test_testing(self):
+        trainer = pl.Trainer(logger=TensorBoardLogger("lightning_logs"), max_epochs=1, gpus=1)
+        trainer.test(self._model, self._data_module.test_dataloader())

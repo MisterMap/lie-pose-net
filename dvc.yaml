@@ -1,11 +1,27 @@
 stages:
     train-pose-net:
         desc: Train Pose Net
-        cmd: python train.py --config configs/pose_net.yaml --out models/pose_net.pth --seed 1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
+        cmd: python train.py --config configs/pose_net.yaml
+            --out models/pose_net.pth --seed 1 --gpu 1 --max_epochs 10 --log_every_n_steps 1
         deps:
             - train.py
+            - lieposenet
         outs:
+            - models/pose_net.pth.ckpt
+
+        params:
+            - configs/pose_net.yaml:
+                - model
+    test-pose-net:
+        desc: Test Pose Net
+        cmd: python eval.py --config configs/pose_net.yaml
+            --model models/pose_net.pth.ckpt --seed 1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
+        deps:
+            - eval.py
+            - lieposenet
             - models/pose_net.pth.ckpt
         params:
             - configs/pose_net.yaml:
-                  - model
+                - model
+        outs:
+            - trajectories.npy

@@ -5,7 +5,7 @@ from ..utils.torch_math import *
 
 class PoseNetCriterion(nn.Module):
     def __init__(self, translation_loss_function=None, rotation_loss_function=None, translation_koef=0.0,
-                 rotation_koef=0.0, requires_grad=False):
+                 rotation_koef=0.0, requires_grad=True):
         super(PoseNetCriterion, self).__init__()
         if translation_loss_function is None:
             translation_loss_function = nn.L1Loss()

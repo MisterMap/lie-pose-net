@@ -5,6 +5,9 @@ implementation of PoseNet and MapNet networks
 """
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+from ..utils.pose_net_result_evaluator import *
+
 
 from .base_lightning_module import BaseLightningModule
 
@@ -33,6 +36,22 @@ class PoseNet(BaseLightningModule):
                 nn.init.kaiming_normal_(m.weight.data)
                 if m.bias is not None:
                     nn.init.constant_(m.bias.data, 0)
+        self._truth_trajectory = np.zeros([0, 3])
+        self._predicted_trajectory = np.zeros([0, 3])
+
+    def save_test_data(self, batch, output, losses):
+        truth_position = batch["position"][:, :3, 3].detach().cpu().numpy()
+        predicted_position = output[:, :3].detach().cpu().numpy()
+        self._truth_trajectory = np.concatenate([self._truth_trajectory, truth_position], axis=0)
+        self._predicted_trajectory = np.concatenate([self._predicted_trajectory, predicted_position], axis=0)
+
+    def show_images(self):
+        figure = show_3d_trajectories([self._truth_trajectory, self._predicted_trajectory])
+        self.logger.log_figure("3d_trajectories", figure, self.global_step)
+
+    def on_test_epoch_end(self):
+        self.show_images()
+        save_trajectories([self._truth_trajectory, self._predicted_trajectory])
 
     def forward(self, x):
         x = self.feature_extractor(x)

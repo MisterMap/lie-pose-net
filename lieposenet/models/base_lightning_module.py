@@ -10,6 +10,9 @@ class BaseLightningModule(pl.LightningModule):
     def loss(self, batch):
         raise NotImplementedError()
 
+    def save_test_data(self, batch, output, losses):
+        raise NotImplementedError()
+
     def training_step(self, batch, batch_index):
         output, losses = self.loss(batch)
         train_losses = {}
@@ -23,6 +26,15 @@ class BaseLightningModule(pl.LightningModule):
         val_losses = {}
         for key, value in losses.items():
             val_losses[f"val_{key}"] = value
+        self.log_dict(val_losses)
+        return losses["loss"]
+
+    def test_step(self, batch, batch_index):
+        output, losses = self.loss(batch)
+        self.save_test_data(batch, output, losses)
+        val_losses = {}
+        for key, value in losses.items():
+            val_losses[f"test_{key}"] = value
         self.log_dict(val_losses)
         return losses["loss"]
 

@@ -1,10 +1,14 @@
 train-pose-net:
   cmd: python train.py --config configs/pose_net.yaml --out models/pose_net.pth --seed
-    1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
+    1 --gpu 1 --max_epochs 10 --log_every_n_steps 1
   deps:
+  - path: lieposenet
+    md5: 0c2827bd1ba3789ea3a40f1ec1d02954.dir
+    size: 73062
+    nfiles: 35
   - path: train.py
-    md5: 8f6d3c266b20313672677b6fa6fdb525
-    size: 1718
+    md5: 366e3675b1b0c9e8da6d49d4d134359d
+    size: 1699
   params:
     configs/pose_net.yaml:
       model:
@@ -20,5 +24,36 @@ train-pose-net:
           betas: 0.9 0.999
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: 0120ddde7621c71cc4ea8e9894839c65
-    size: 268390884
+    md5: d3c2b1f32857246be0e107ae4d682f64
+    size: 268392186
+test-pose-net:
+  cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
+    --seed 1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
+  deps:
+  - path: eval.py
+    md5: 46a12a41d9794eca1327f71bc876e41d
+    size: 1667
+  - path: lieposenet
+    md5: 0c2827bd1ba3789ea3a40f1ec1d02954.dir
+    size: 73062
+    nfiles: 35
+  - path: models/pose_net.pth.ckpt
+    md5: d3c2b1f32857246be0e107ae4d682f64
+    size: 268392186
+  params:
+    configs/pose_net.yaml:
+      model:
+        name: pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: pose_net_criterion
+        feature_dimension: 2048
+        drop_rate: 0.5
+        optimizer:
+          betas: 0.9 0.999
+  outs:
+  - path: trajectories.npy
+    md5: ae791885fc35657a8c5fd0323238f110
+    size: 96128
