@@ -6,6 +6,7 @@ import torch
 from lieposenet import ModelFactory
 from lieposenet.data import SevenScenesDataModule
 from lieposenet.utils import TensorBoardLogger, load_hparams_from_yaml
+import json
 
 parser = ArgumentParser(description="Evaluate pose net model")
 parser.add_argument("--config", type=str, default="./configs/model.yaml")
@@ -15,6 +16,7 @@ parser.add_argument("--batch_size", type=int, default=32)
 parser.add_argument("--num_workers", type=int, default=4)
 parser.add_argument("--seed", type=int, default=None)
 parser.add_argument("--model", type=str, default="model.pth")
+parser.add_argument("--result", type=str, default="metrics.json")
 
 parser = pl.Trainer.add_argparse_args(parser)
 arguments = parser.parse_args()
@@ -47,4 +49,6 @@ model = ModelFactory().make_model(params)
 model.load_state_dict(torch.load(arguments.model)['state_dict'])
 
 print("Start testing")
-trainer.test(model, data_module.test_dataloader())
+results = trainer.test(model, data_module.test_dataloader())
+with open(arguments.result, "w") as fd:
+    json.dump(results[0], fd)

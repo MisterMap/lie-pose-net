@@ -25,3 +25,5 @@ stages:
                 - model
         outs:
             - trajectories.npy
+        metrics:
+            - metrics.json

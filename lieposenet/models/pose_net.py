@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 from ..utils.pose_net_result_evaluator import *
+from ..utils.torch_math import *
 
 
 from .base_lightning_module import BaseLightningModule
@@ -68,3 +69,14 @@ class PoseNet(BaseLightningModule):
         target_position = batch["position"]
         loss = self.criterion(predicted_position, target_position)
         return predicted_position, {"loss": loss}
+
+    def metrics(self, batch, output):
+        truth_position = batch["position"][:, :3, 3]
+        truth_rotation = quaternion_from_matrix(batch["position"])
+        predicted_position = output[:, :3]
+        predicted_rotation = quaternion_from_logq(output[:, 3:])
+        metrics = {
+            "position_error": torch.mean(torch.sqrt((truth_position - predicted_position) ** 2)),
+            "rotation_error": torch.mean(quaternion_angular_error(truth_rotation, predicted_rotation))
+        }
+        return metrics

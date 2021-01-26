@@ -96,6 +96,7 @@ class SevenScenes(data.Dataset):
         else:
             raise Exception('Wrong mode {:d}'.format(self.mode))
 
+        pose = pose.astype(np.float32)
         if self.target_transform is not None:
             pose = self.target_transform(pose)
 
