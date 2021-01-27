@@ -1,6 +1,6 @@
 train-pose-net:
   cmd: python train.py --config configs/pose_net.yaml --out models/pose_net.pth --seed
-    1 --gpu 1 --max_epochs 10 --log_every_n_steps 1
+    1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
     md5: 733ba5ecb1f166c8146162c63893e16a.dir
@@ -24,8 +24,8 @@ train-pose-net:
           betas: 0.9 0.999
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: 6bd0970025945a479fa48a1c62a25505
-    size: 268391310
+    md5: 53a338787889038da7b5a27dd7105b36
+    size: 268391181
 test-pose-net:
   cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
     --seed 1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
