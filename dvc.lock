@@ -19,13 +19,13 @@ train-pose-net:
         criterion:
           name: pose_net_criterion
         feature_dimension: 2048
-        drop_rate: 0.5
+        drop_rate: 0.4
         optimizer:
           betas: 0.9 0.999
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: cceb0756db6ad6a7f682c5ca892ee9d4
-    size: 268392062
+    md5: 86f4577f4dce8d0e38e3d24f35bc80d3
+    size: 268391168
 test-pose-net:
   cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
     --seed 1 --gpu 1 --max_epochs 1 --log_every_n_steps 1
@@ -38,8 +38,8 @@ test-pose-net:
     size: 75806
     nfiles: 35
   - path: models/pose_net.pth.ckpt
-    md5: cceb0756db6ad6a7f682c5ca892ee9d4
-    size: 268392062
+    md5: 86f4577f4dce8d0e38e3d24f35bc80d3
+    size: 268391168
   params:
     configs/pose_net.yaml:
       model:
@@ -50,13 +50,13 @@ test-pose-net:
         criterion:
           name: pose_net_criterion
         feature_dimension: 2048
-        drop_rate: 0.5
+        drop_rate: 0.4
         optimizer:
           betas: 0.9 0.999
   outs:
   - path: metrics.json
-    md5: 0835a3e03cd8b164dfbcaf6bc91052d3
-    size: 109
+    md5: 51563f2fb334a4c8a09a47b4940cb643
+    size: 107
   - path: trajectories.npy
-    md5: ec0a36d20700c8f25c37e91ba162604d
+    md5: 52ae6ef3b17cae48f2c7680c28567634
     size: 96128
