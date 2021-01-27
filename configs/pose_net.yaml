@@ -6,6 +6,8 @@ model:
     criterion:
         name: pose_net_criterion
     feature_dimension: 2048
-    drop_rate: 0.4
+    drop_rate: 0.5
     optimizer:
         betas: 0.9 0.999
+
+max_epochs: 1

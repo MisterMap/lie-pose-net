@@ -29,20 +29,21 @@ if arguments.seed is not None:
     seed = arguments.seed
 
 # Make trainer
+params = load_hparams_from_yaml(arguments.config)
 checkpoint_callback = pl.callbacks.ModelCheckpoint(filepath=arguments.out)
 trainer = pl.Trainer.from_argparse_args(arguments, logger=logger, callbacks=[checkpoint_callback],
-                                        deterministic=deterministic)
+                                        deterministic=deterministic, max_epochs=params.max_epochs)
 
 # Make data module
 data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_folder,
                                     arguments.batch_size, arguments.num_workers)
 
 # Load parameters
-params = load_hparams_from_yaml(arguments.config).model
-print("Load model from params \n" + str(params))
+model_params = params.model
+print("Load model from params \n" + str(model_params))
 
 # Make model
-model = ModelFactory().make_model(params)
+model = ModelFactory().make_model(model_params)
 
 print("Start training")
 trainer.fit(model, data_module)
