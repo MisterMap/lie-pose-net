@@ -26,4 +26,5 @@ stages:
         outs:
             - trajectories.npy
         metrics:
-            - metrics.json
+            - metrics.json:
+                cache: false
