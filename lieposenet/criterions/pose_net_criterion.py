@@ -1,9 +1,10 @@
 import torch.nn as nn
 
 from ..utils.torch_math import *
+from .base_pose_criterion import BasePoseCriterion
 
 
-class PoseNetCriterion(nn.Module):
+class PoseNetCriterion(BasePoseCriterion):
     def __init__(self, translation_loss_function=None, rotation_loss_function=None, translation_koef=0.0,
                  rotation_koef=0.0, requires_grad=True):
         super(PoseNetCriterion, self).__init__()
@@ -15,7 +16,10 @@ class PoseNetCriterion(nn.Module):
         self.rotation_loss_function = rotation_loss_function
         self.translation_koef = nn.Parameter(torch.tensor([translation_koef]), requires_grad=requires_grad)
         self.rotation_koef = nn.Parameter(torch.tensor([rotation_koef]), requires_grad=requires_grad)
-        self.position_dimension = 6
+
+    @property
+    def position_dimension(self):
+        return 6
 
     def forward(self, predicted_position, target_position):
         """
@@ -29,3 +33,9 @@ class PoseNetCriterion(nn.Module):
         loss = torch.exp(-self.translation_koef) * translation_loss + self.translation_koef + \
                torch.exp(-self.rotation_koef) * rotation_loss + self.rotation_koef
         return loss
+
+    def translation(self, predicted_position):
+        return predicted_position[:, :3]
+
+    def rotation(self, predicted_position):
+        return quaternion_from_logq(predicted_position[:, 3:6])

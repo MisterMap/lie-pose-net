@@ -3,30 +3,31 @@ train-pose-net:
     1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 733ba5ecb1f166c8146162c63893e16a.dir
-    size: 75806
-    nfiles: 35
+    md5: dd2734d5439828fa7fb574ff24a1ccbf.dir
+    size: 87835
+    nfiles: 41
   - path: train.py
     md5: a75669996f890000006d9b4eee451c4f
     size: 1763
   params:
     configs/pose_net.yaml:
-      max_epochs: 1
+      max_epochs: 10
       model:
         name: pose_net
         feature_extractor:
           name: resnet34
           pretrained: true
         criterion:
-          name: pose_net_criterion
+          name: se3
         feature_dimension: 2048
         drop_rate: 0.5
         optimizer:
           betas: 0.9 0.999
+          lr: 0.0001
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: deda0a7ea092c960ea0071752d66cacc
-    size: 268391172
+    md5: b82bd208d3a61367e11dce7afec7535c
+    size: 268561392
 test-pose-net:
   cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -35,12 +36,12 @@ test-pose-net:
     md5: 62d59a4c626b6b689d01b8807dc3ff81
     size: 1825
   - path: lieposenet
-    md5: 733ba5ecb1f166c8146162c63893e16a.dir
-    size: 75806
-    nfiles: 35
+    md5: dd2734d5439828fa7fb574ff24a1ccbf.dir
+    size: 87835
+    nfiles: 41
   - path: models/pose_net.pth.ckpt
-    md5: deda0a7ea092c960ea0071752d66cacc
-    size: 268391172
+    md5: b82bd208d3a61367e11dce7afec7535c
+    size: 268561392
   params:
     configs/pose_net.yaml:
       model:
@@ -49,15 +50,16 @@ test-pose-net:
           name: resnet34
           pretrained: true
         criterion:
-          name: pose_net_criterion
+          name: se3
         feature_dimension: 2048
         drop_rate: 0.5
         optimizer:
           betas: 0.9 0.999
+          lr: 0.0001
   outs:
   - path: metrics.json
-    md5: 0835a3e03cd8b164dfbcaf6bc91052d3
+    md5: d107b247c90a4e1bfa4173c1c31543ab
     size: 109
   - path: trajectories.npy
-    md5: ec0a36d20700c8f25c37e91ba162604d
+    md5: 423caf12816b10a761ca2ae90c037266
     size: 96128

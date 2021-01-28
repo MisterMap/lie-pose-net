@@ -73,8 +73,8 @@ class PoseNet(BaseLightningModule):
     def metrics(self, batch, output):
         truth_position = batch["position"][:, :3, 3]
         truth_rotation = quaternion_from_matrix(batch["position"])
-        predicted_position = output[:, :3]
-        predicted_rotation = quaternion_from_logq(output[:, 3:])
+        predicted_position = self.criterion.translation(output)
+        predicted_rotation = self.criterion.rotation(output)
         metrics = {
             "position_error": torch.mean(torch.sqrt((truth_position - predicted_position) ** 2)),
             "rotation_error": torch.mean(quaternion_angular_error(truth_rotation, predicted_rotation))

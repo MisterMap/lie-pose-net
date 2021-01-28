@@ -17,3 +17,4 @@ setuptools
 wheel
 grpcio
 pytorch-lightning
+-e git://github.com/MisterMap/liegroups.git#egg=elasticutils
