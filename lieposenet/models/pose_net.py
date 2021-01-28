@@ -28,7 +28,8 @@ class PoseNet(BaseLightningModule):
 
         # initialize
         if parameters.feature_extractor.pretrained:
-            init_modules = [self.feature_extractor.fc, self.final_fc]
+            # init_modules = [self.feature_extractor.fc, self.final_fc]
+            init_modules = [self.feature_extractor.fc]
         else:
             init_modules = self.modules()
 

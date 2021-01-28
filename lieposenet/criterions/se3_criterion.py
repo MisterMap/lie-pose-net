@@ -23,7 +23,7 @@ class SE3Criterion(BasePoseCriterion):
         if delta_log.dim() < 2:
             delta_log = delta_log[None]
         inverse_sigma_matrix = self.get_sigma_matrix(logvar).expand(delta_log.shape[0], delta_log.shape[1],
-                                                                            delta_log.shape[1])
+                                                                    delta_log.shape[1])
         delta_log = torch.bmm(inverse_sigma_matrix, delta_log[:, :, None])[:, :, 0]
         log_determinant = self.get_logvar_determinant(logvar)
 
@@ -40,6 +40,7 @@ class SE3Criterion(BasePoseCriterion):
         for i in range(dim):
             for j in range(i + 1, dim):
                 matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
+                # matrix[:, i, j] = torch.sinh(logvar[:, k])
                 k += 1
         return matrix
 
