@@ -11,7 +11,7 @@ class TestLieCriterion(unittest.TestCase):
         self._criterion = SE3Criterion()
         self._logvar = (torch.arange(1, 22, requires_grad=True, dtype=torch.float) * 0.1)[None]
         self._position = (torch.arange(1, self._criterion.position_dimension + 1, requires_grad=True,
-                                       dtype=torch.float) * 0.1)[None]
+                                       dtype=torch.float) * 0.3)[None]
         self._position[:6] = 0
         self._target_position = torch.eye(4, 4)[None]
 
@@ -33,9 +33,9 @@ class TestLieCriterion(unittest.TestCase):
         for i in range(6):
             for j in range(6):
                 if i == j:
-                    self.assertAlmostEqual(matrix_product[0, i, j].item(), 1., 6)
+                    self.assertAlmostEqual(matrix_product[0, i, j].item(), 1., 5)
                 else:
-                    self.assertAlmostEqual(matrix_product[0, i, j].item(), 0., 6)
+                    self.assertAlmostEqual(matrix_product[0, i, j].item(), 0., 5)
 
     def test_forward(self):
         loss = self._criterion.forward(self._position, self._target_position)

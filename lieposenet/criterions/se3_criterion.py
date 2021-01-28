@@ -8,7 +8,7 @@ class SE3Criterion(BasePoseCriterion):
     @property
     def position_dimension(self):
         # return 6 + 21
-        return 7 + 6
+        return 7 + 6 + 15
 
     def forward(self, predicted_position, target_position):
         logvar = predicted_position[:, 7:]
@@ -22,7 +22,7 @@ class SE3Criterion(BasePoseCriterion):
         delta_log = SE3.log(SE3.from_matrix(delta_matrix, normalize=False, check=False))
         if delta_log.dim() < 2:
             delta_log = delta_log[None]
-        inverse_sigma_matrix = self.get_inverse_sigma_matrix(logvar).expand(delta_log.shape[0], delta_log.shape[1],
+        inverse_sigma_matrix = self.get_sigma_matrix(logvar).expand(delta_log.shape[0], delta_log.shape[1],
                                                                             delta_log.shape[1])
         delta_log = torch.bmm(inverse_sigma_matrix, delta_log[:, :, None])[:, :, 0]
         log_determinant = self.get_logvar_determinant(logvar)
@@ -35,12 +35,12 @@ class SE3Criterion(BasePoseCriterion):
         matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
         k = 0
         for i in range(dim):
-            matrix[:, i, i] = torch.exp(0.5 * logvar[:, k])
+            matrix[:, i, i] = torch.exp(-0.5 * logvar[:, k])
             k += 1
-        # for i in range(dim):
-        #     for j in range(i + 1, dim):
-        #         matrix[:, i, j] = torch.exp(0.5 * logvar[:, i]) * logvar[:, k]
-        #         k += 1
+        for i in range(dim):
+            for j in range(i + 1, dim):
+                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
+                k += 1
         return matrix
 
     @staticmethod
@@ -54,21 +54,21 @@ class SE3Criterion(BasePoseCriterion):
             matrix.append([])
             for j in range(dim):
                 matrix[i].append(torch.zeros(logvar.shape[0], dtype=torch.float, device=logvar.device))
-        # auxiliary_matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
         k = 0
         for i in range(dim):
             matrix[i][i] = torch.exp(-0.5 * logvar[:, k])
             k += 1
-        # for i in range(dim):
-        #     for j in range(i + 1, dim):
-        #         auxiliary_matrix[:, i, j] = logvar[:, k]
-        #         k += 1
-        # for i in range(dim - 1, -1, -1):
-        #     for j in range(i + 1, dim):
-        #         vector = torch.zeros(logvar.shape[0], j + 1 - i, device=logvar.device)
-        #         for k in range(i, j + 1):
-        #             vector[:, k - i] = -auxiliary_matrix[:, i, k] * matrix[k][j]
-        #         matrix[i][j] = torch.sum(vector, dim=1)
+        auxiliary_matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
+        for i in range(dim):
+            for j in range(i + 1, dim):
+                auxiliary_matrix[:, i, j] = torch.sinh(logvar[:, k])
+                k += 1
+        for i in range(dim - 1, -1, -1):
+            for j in range(i + 1, dim):
+                vector = torch.zeros(logvar.shape[0], j + 1 - i, device=logvar.device)
+                for k in range(i, j + 1):
+                    vector[:, k - i] = -auxiliary_matrix[:, i, k] * matrix[k][j]
+                matrix[i][j] = torch.sum(vector, dim=1)
         result = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
         for i in range(dim):
             for j in range(dim):
