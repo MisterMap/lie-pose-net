@@ -4,7 +4,7 @@ model:
         name: resnet34
         pretrained: True
     criterion:
-        name: poe_se3
+        name: pose_net_criterion
     feature_dimension: 2048
     drop_rate: 0.5
     optimizer:
