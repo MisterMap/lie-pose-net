@@ -40,12 +40,14 @@ class PoseNet(BaseLightningModule):
                     nn.init.constant_(m.bias.data, 0)
         self._truth_trajectory = np.zeros([0, 3])
         self._predicted_trajectory = np.zeros([0, 3])
+        self._predicted_result = np.zeros([0, criterion.position_dimension])
 
     def save_test_data(self, batch, output, losses):
         truth_position = batch["position"][:, :3, 3].detach().cpu().numpy()
         predicted_position = output[:, :3].detach().cpu().numpy()
         self._truth_trajectory = np.concatenate([self._truth_trajectory, truth_position], axis=0)
         self._predicted_trajectory = np.concatenate([self._predicted_trajectory, predicted_position], axis=0)
+        self._predicted_result = np.concatenate([self._predicted_result, output.detach().cpu().numpy()], axis=0)
 
     def show_images(self):
         figure = show_3d_trajectories([self._truth_trajectory, self._predicted_trajectory])

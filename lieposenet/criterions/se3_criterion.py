@@ -22,7 +22,7 @@ class SE3Criterion(BasePoseCriterion):
         delta_log = SE3.log(SE3.from_matrix(delta_matrix, normalize=False, check=False))
         if delta_log.dim() < 2:
             delta_log = delta_log[None]
-        inverse_sigma_matrix = self.get_sigma_matrix(logvar).expand(delta_log.shape[0], delta_log.shape[1],
+        inverse_sigma_matrix = self.get_inverse_sigma_matrix(logvar).expand(delta_log.shape[0], delta_log.shape[1],
                                                                     delta_log.shape[1])
         delta_log = torch.bmm(inverse_sigma_matrix, delta_log[:, :, None])[:, :, 0]
         log_determinant = self.get_logvar_determinant(logvar)
@@ -32,24 +32,6 @@ class SE3Criterion(BasePoseCriterion):
 
     @staticmethod
     def get_sigma_matrix(logvar, dim=6):
-        matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
-        k = 0
-        for i in range(dim):
-            matrix[:, i, i] = torch.exp(-0.5 * logvar[:, k])
-            k += 1
-        for i in range(dim):
-            for j in range(i + 1, dim):
-                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
-                # matrix[:, i, j] = torch.sinh(logvar[:, k])
-                k += 1
-        return matrix
-
-    @staticmethod
-    def get_logvar_determinant(logvar):
-        return torch.sum(logvar[:, :6], dim=1)
-
-    @staticmethod
-    def get_inverse_sigma_matrix(logvar, dim=6):
         matrix = []
         for i in range(dim):
             matrix.append([])
@@ -57,7 +39,7 @@ class SE3Criterion(BasePoseCriterion):
                 matrix[i].append(torch.zeros(logvar.shape[0], dtype=torch.float, device=logvar.device))
         k = 0
         for i in range(dim):
-            matrix[i][i] = torch.exp(-0.5 * logvar[:, k])
+            matrix[i][i] = torch.exp(0.5 * logvar[:, k])
             k += 1
         auxiliary_matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
         for i in range(dim):
@@ -75,6 +57,23 @@ class SE3Criterion(BasePoseCriterion):
             for j in range(dim):
                 result[:, i, j] = matrix[i][j]
         return result
+
+    @staticmethod
+    def get_logvar_determinant(logvar):
+        return torch.sum(logvar[:, :6], dim=1)
+
+    @staticmethod
+    def get_inverse_sigma_matrix(logvar, dim=6):
+        matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
+        k = 0
+        for i in range(dim):
+            matrix[:, i, i] = torch.exp(-0.5 * logvar[:, k])
+            k += 1
+        for i in range(dim):
+            for j in range(i + 1, dim):
+                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
+                k += 1
+        return matrix
 
     def translation(self, predicted_position):
         return predicted_position[:, :3]

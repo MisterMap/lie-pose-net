@@ -1,6 +1,7 @@
 from ..models.pose_net import PoseNet
 from ..criterions.pose_net_criterion import PoseNetCriterion
 from ..criterions.se3_criterion import SE3Criterion
+from ..criterions.poe_se3_criterion import POESE3Criterion
 from torchvision import models
 
 
@@ -35,5 +36,7 @@ class ModelFactory(object):
             return PoseNetCriterion(**remove_name_key(parameters))
         elif parameters.name == "se3":
             return SE3Criterion()
+        if parameters.name == "poe_se3":
+            return POESE3Criterion(**remove_name_key(parameters))
         else:
             raise ValueError("Unknown criterion name: {}".format(parameters.name))
