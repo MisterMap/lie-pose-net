@@ -10,9 +10,13 @@ class SE3Criterion(BasePoseCriterion):
         # return 6 + 21
         return 7 + 6 + 15
 
+    @staticmethod
+    def mean_matrix(predicted_position):
+        return matrix_from_q_position(predicted_position[:, :7])
+
     def forward(self, predicted_position, target_position):
         logvar = predicted_position[:, 7:]
-        mean_matrix = matrix_from_q_position(predicted_position[:, :7])
+        mean_matrix = self.mean_matrix(predicted_position)
         return self.log_prob(target_position, mean_matrix, logvar)
 
     def log_prob(self, value_matrix, mean_matrix, logvar):

@@ -24,7 +24,7 @@ class PoseNet(BaseLightningModule):
         feature_extractor_output_dimension = self.feature_extractor.fc.in_features
         self.feature_extractor.fc = nn.Linear(feature_extractor_output_dimension, parameters.feature_dimension)
 
-        self.final_fc = nn.Linear(parameters.feature_dimension, criterion.position_dimension)
+        self.final_fc = nn.Linear(parameters.feature_dimension, criterion.position_dimension, bias=parameters.bias)
 
         # initialize
         if parameters.feature_extractor.pretrained:
