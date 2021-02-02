@@ -55,13 +55,17 @@ class PoseNet(BaseLightningModule):
 
     def on_test_epoch_end(self):
         self.show_images()
-        save_trajectories([self._truth_trajectory, self._predicted_trajectory])
+        data = {
+            "truth_trajectory": self._truth_trajectory,
+            "predicted_trajectory": self._predicted_trajectory,
+        }
+        save_trajectories(data)
 
     def forward(self, x):
         x = self.feature_extractor(x)
         x = F.relu(x)
-        if self.hparams.drop_rate > 0:
-            x = F.dropout(x, p=self.hparams.drop_rate)
+        # if self.hparams.drop_rate > 0:
+        #     x = F.dropout(x, p=self.hparams.drop_rate)
 
         x = self.final_fc(x)
         return x
@@ -79,7 +83,7 @@ class PoseNet(BaseLightningModule):
         predicted_position = self.criterion.translation(output)
         predicted_rotation = self.criterion.rotation(output)
         metrics = {
-            "position_error": torch.mean(torch.sqrt((truth_position - predicted_position) ** 2)),
+            "position_error": torch.mean(torch.sqrt(torch.sum((truth_position - predicted_position) ** 2, dim=1))),
             "rotation_error": torch.mean(quaternion_angular_error(truth_rotation, predicted_rotation))
         }
         return metrics

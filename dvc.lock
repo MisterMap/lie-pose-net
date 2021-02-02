@@ -3,8 +3,8 @@ train-pose-net:
     1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 7be6c382c32b40f7414a764240b29a3d.dir
-    size: 96786
+    md5: 54baa177b385605a86bc806ff631967f.dir
+    size: 96972
     nfiles: 45
   - path: train.py
     md5: a75669996f890000006d9b4eee451c4f
@@ -24,10 +24,12 @@ train-pose-net:
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
+          weight_decay: 0.0005
+        bias: false
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: 015005e5c6ed8e9a0c784443c617b153
-    size: 275124811
+    md5: 4ccd4a1fe55cf0247ec1500b0812a52c
+    size: 275124126
 test-pose-net:
   cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -36,12 +38,12 @@ test-pose-net:
     md5: 62d59a4c626b6b689d01b8807dc3ff81
     size: 1825
   - path: lieposenet
-    md5: 7be6c382c32b40f7414a764240b29a3d.dir
-    size: 96786
+    md5: 7b5c8f75e5f513a12df09e6580893abc.dir
+    size: 96959
     nfiles: 45
   - path: models/pose_net.pth.ckpt
-    md5: 015005e5c6ed8e9a0c784443c617b153
-    size: 275124811
+    md5: 4ccd4a1fe55cf0247ec1500b0812a52c
+    size: 275124126
   params:
     configs/pose_net.yaml:
       model:
@@ -56,10 +58,12 @@ test-pose-net:
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
+          weight_decay: 0.0005
+        bias: false
   outs:
   - path: metrics.json
-    md5: e9b58bcd9f511a7cf4839b04e357c0ec
-    size: 111
+    md5: 5faec0285f5d155b72bc165e0c26be4b
+    size: 110
   - path: trajectories.npy
-    md5: fbfe1c86e985b1b67e9bac563b1d6c92
-    size: 96128
+    md5: ac4a5ab666f68aabb9710bc3a0da0367
+    size: 96463

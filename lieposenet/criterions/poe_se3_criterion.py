@@ -26,7 +26,7 @@ class POESE3Criterion(SE3Criterion):
                                                         predicted_position.shape[1] // self._head_count)
         logvar = predicted_position[:, 7:]
         mean_matrix = self.mean_matrix(predicted_position)
-        log_mean = SE3.log(SE3.from_matrix(mean_matrix, normalize=False))
+        log_mean = SE3.log(SE3.from_matrix(mean_matrix, normalize=False, check=False))
         if log_mean.dim() < 2:
             log_mean = log_mean[None]
         inverse_sigma_matrix = self.get_inverse_sigma_matrix(logvar)
