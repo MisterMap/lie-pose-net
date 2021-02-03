@@ -11,7 +11,6 @@ class SevenScenesDataModule(pl.LightningDataModule):
         torch.random.manual_seed(seed)
         image_transform = transforms.Compose([
             transforms.Resize(256),
-            transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
@@ -21,9 +20,10 @@ class SevenScenesDataModule(pl.LightningDataModule):
         self._batch_size = batch_size
         self._num_workers = num_workers
         train_length = len(self._train_dataset)
-        lengths = int(train_length * split[0]), train_length - int(train_length * split[0])
+        # lengths = int(train_length * split[0]), train_length - int(train_length * split[0])
 
-        self._train_subset, self._validation_subset = torch.utils.data.random_split(self._train_dataset, lengths)
+        # self._train_subset, self._validation_subset = torch.utils.data.random_split(self._train_dataset, lengths)
+        self._train_subset, self._validation_subset = self._train_dataset, self._test_dataset
         print(f"[ToyDataModule] - train dataset size {len(self._train_dataset)}")
         print(f"[ToyDataModule] - validation dataset size {len(self._validation_subset)}")
 
