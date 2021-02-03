@@ -4,8 +4,8 @@ model:
         name: resnet34
         pretrained: True
     criterion:
-        name: pose_net_criterion
-        rotation_koef: -3.0
+        name: se3
+#        rotation_koef: -3.0
     feature_dimension: 2048
     drop_rate: 0.05
     optimizer:

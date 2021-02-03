@@ -18,8 +18,7 @@ train-pose-net:
           name: resnet34
           pretrained: true
         criterion:
-          name: pose_net_criterion
-          rotation_koef: -3.0
+          name: se3
         feature_dimension: 2048
         drop_rate: 0.05
         optimizer:
@@ -29,8 +28,8 @@ train-pose-net:
         bias: true
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: 0866208a831889997a1862534d7acd79
-    size: 268391457
+    md5: 9a818fca50d9ab982aea587ae253781e
+    size: 268930426
 test-pose-net:
   cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -43,8 +42,8 @@ test-pose-net:
     size: 99819
     nfiles: 47
   - path: models/pose_net.pth.ckpt
-    md5: 0866208a831889997a1862534d7acd79
-    size: 268391457
+    md5: 9a818fca50d9ab982aea587ae253781e
+    size: 268930426
   params:
     configs/pose_net.yaml:
       model:
@@ -53,8 +52,7 @@ test-pose-net:
           name: resnet34
           pretrained: true
         criterion:
-          name: pose_net_criterion
-          rotation_koef: -3.0
+          name: se3
         feature_dimension: 2048
         drop_rate: 0.05
         optimizer:
@@ -64,8 +62,8 @@ test-pose-net:
         bias: true
   outs:
   - path: metrics.json
-    md5: 4e97ad3e63d233e5e6b8e83af84345cd
-    size: 196
+    md5: cce1f71dacb8f5742cfb27d9e6b75ae2
+    size: 200
   - path: trajectories.npy
-    md5: 240c40066dcb56aed71ee3572e54dee0
-    size: 160644
+    md5: c1a340a930ad8b5955ce9474c06960f2
+    size: 336644
