@@ -14,4 +14,4 @@ model:
         weight_decay: 0.0005
     bias: True
 
-max_epochs: 1
+max_epochs: 10
