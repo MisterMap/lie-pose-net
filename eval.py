@@ -6,6 +6,7 @@ import torch
 from lieposenet import ModelFactory
 from lieposenet.data import SevenScenesDataModule
 from lieposenet.utils import TensorBoardLogger, load_hparams_from_yaml
+from lieposenet.utils.pose_net_result_evaluator import calculate_metrics
 import json
 
 parser = ArgumentParser(description="Evaluate pose net model")
@@ -50,5 +51,11 @@ model.load_state_dict(torch.load(arguments.model)['state_dict'])
 
 print("Start testing")
 results = trainer.test(model, data_module.test_dataloader())
+results[0].update(calculate_metrics(model._data_saver))
+
+print("Final result:")
+for key, value in results[0].items():
+    print("{}: {}".format(key, value))
+
 with open(arguments.result, "w") as fd:
     json.dump(results[0], fd)
