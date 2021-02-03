@@ -5,12 +5,11 @@ implementation of PoseNet and MapNet networks
 """
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from ..utils.pose_net_result_evaluator import *
-from ..utils.torch_math import *
-
 
 from .base_lightning_module import BaseLightningModule
+from ..utils.pose_net_result_evaluator import *
+from ..utils.torch_math import *
+from ..utils.data_saver import DataSaver
 
 
 class PoseNet(BaseLightningModule):
@@ -38,34 +37,29 @@ class PoseNet(BaseLightningModule):
                 nn.init.kaiming_normal_(m.weight.data)
                 if m.bias is not None:
                     nn.init.constant_(m.bias.data, 0)
-        self._truth_trajectory = np.zeros([0, 3])
-        self._predicted_trajectory = np.zeros([0, 3])
-        self._predicted_result = np.zeros([0, criterion.position_dimension])
+
+        self._data_saver = DataSaver()
 
     def save_test_data(self, batch, output, losses):
-        truth_position = batch["position"][:, :3, 3].detach().cpu().numpy()
-        predicted_position = output[:, :3].detach().cpu().numpy()
-        self._truth_trajectory = np.concatenate([self._truth_trajectory, truth_position], axis=0)
-        self._predicted_trajectory = np.concatenate([self._predicted_trajectory, predicted_position], axis=0)
-        self._predicted_result = np.concatenate([self._predicted_result, output.detach().cpu().numpy()], axis=0)
+        self._data_saver.add("truth_position", batch["position"][:, :3, 3])
+        self._data_saver.add("truth_rotation", quaternion_from_matrix(batch["position"]))
+        self._data_saver.add("predicted_position", self.criterion.translation(output))
+        self._data_saver.add("predicted_rotation", self.criterion.rotation(output))
+        self._data_saver.add("output", output)
 
     def show_images(self):
-        figure = show_3d_trajectories([self._truth_trajectory, self._predicted_trajectory])
+        figure = show_3d_trajectories([self._data_saver["truth_position"],
+                                       self._data_saver["predicted_position"]])
         self.logger.log_figure("3d_trajectories", figure, self.global_step)
 
     def on_test_epoch_end(self):
-        self.show_images()
-        data = {
-            "truth_trajectory": self._truth_trajectory,
-            "predicted_trajectory": self._predicted_trajectory,
-        }
-        save_trajectories(data)
+        self._data_saver.save()
 
     def forward(self, x):
         x = self.feature_extractor(x)
         x = F.relu(x)
-        # if self.hparams.drop_rate > 0:
-        #     x = F.dropout(x, p=self.hparams.drop_rate)
+        if self.hparams.drop_rate > 0:
+            x = F.dropout(x, p=self.hparams.drop_rate, training=self.training)
 
         x = self.final_fc(x)
         return x

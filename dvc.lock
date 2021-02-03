@@ -3,24 +3,25 @@ train-pose-net:
     1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: da0a00ca5375d8eb62f1766576c318ee.dir
-    size: 96906
-    nfiles: 45
+    md5: 3b59a6848b82511de60bdfb4678a3219.dir
+    size: 97839
+    nfiles: 47
   - path: train.py
     md5: a75669996f890000006d9b4eee451c4f
     size: 1763
   params:
     configs/pose_net.yaml:
-      max_epochs: 300
+      max_epochs: 1
       model:
         name: pose_net
         feature_extractor:
           name: resnet34
           pretrained: true
         criterion:
-          name: se3
+          name: pose_net_criterion
+          rotation_koef: -3.0
         feature_dimension: 2048
-        drop_rate: 0.5
+        drop_rate: 0.05
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
@@ -28,8 +29,8 @@ train-pose-net:
         bias: true
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: eb8c5012f71b967c9c6d4e58a3a02f17
-    size: 268930379
+    md5: 9d0d6a7b880acf300708d2b38301fa82
+    size: 268392092
 test-pose-net:
   cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -38,12 +39,12 @@ test-pose-net:
     md5: 62d59a4c626b6b689d01b8807dc3ff81
     size: 1825
   - path: lieposenet
-    md5: da0a00ca5375d8eb62f1766576c318ee.dir
-    size: 96906
-    nfiles: 45
+    md5: 3b59a6848b82511de60bdfb4678a3219.dir
+    size: 97839
+    nfiles: 47
   - path: models/pose_net.pth.ckpt
-    md5: eb8c5012f71b967c9c6d4e58a3a02f17
-    size: 268930379
+    md5: 9d0d6a7b880acf300708d2b38301fa82
+    size: 268392092
   params:
     configs/pose_net.yaml:
       model:
@@ -52,9 +53,10 @@ test-pose-net:
           name: resnet34
           pretrained: true
         criterion:
-          name: se3
+          name: pose_net_criterion
+          rotation_koef: -3.0
         feature_dimension: 2048
-        drop_rate: 0.5
+        drop_rate: 0.05
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
@@ -62,8 +64,8 @@ test-pose-net:
         bias: true
   outs:
   - path: metrics.json
-    md5: 00e3406d87a232f773cd432525890a27
-    size: 107
+    md5: cc7b697e2b377932d97d3698c6c53d54
+    size: 110
   - path: trajectories.npy
-    md5: 9c9f7f3eb81e3154f5bc12cbe81410db
-    size: 96463
+    md5: 6ed27294740db985db1ef30bd1091a62
+    size: 160644
