@@ -35,8 +35,9 @@ trainer = pl.Trainer.from_argparse_args(arguments, logger=logger, callbacks=[che
                                         deterministic=deterministic, max_epochs=params.max_epochs)
 
 # Make data module
+data_module_params = params.data_module
 data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_folder,
-                                    arguments.batch_size, arguments.num_workers)
+                                    **data_module_params)
 
 # Load parameters
 model_params = params.model

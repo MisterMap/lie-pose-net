@@ -5,6 +5,12 @@ from ..utils.torch_math import *
 
 
 class SE3Criterion(BasePoseCriterion):
+    def __init__(self, rotation_base_error=0, translation_base_error=0):
+        super().__init__()
+        self._base_covariance = torch.tensor([translation_base_error ** 2, translation_base_error ** 2,
+                                              translation_base_error ** 2, rotation_base_error ** 2,
+                                              rotation_base_error ** 2, rotation_base_error ** 2])
+
     @property
     def position_dimension(self):
         # return 6 + 21
@@ -27,11 +33,15 @@ class SE3Criterion(BasePoseCriterion):
         if delta_log.dim() < 2:
             delta_log = delta_log[None]
         inverse_sigma_matrix = self.get_inverse_sigma_matrix(logvar).expand(delta_log.shape[0], delta_log.shape[1],
-                                                                    delta_log.shape[1])
+                                                                            delta_log.shape[1])
         delta_log = torch.bmm(inverse_sigma_matrix, delta_log[:, :, None])[:, :, 0]
         log_determinant = self.get_logvar_determinant(logvar)
 
-        log_prob = torch.sum(delta_log ** 2 / 2., dim=1) + 0.5 * log_determinant + 6 * math.log(math.sqrt(2 * math.pi))
+        self._base_covariance = self._base_covariance.to(value_matrix.device)
+        trace = torch.sum(inverse_sigma_matrix * inverse_sigma_matrix, dim=2) * self._base_covariance
+        log_prob = torch.sum(delta_log ** 2 / 2., dim=1
+                             ) + 0.5 * log_determinant + 6 * math.log(math.sqrt(2 * math.pi)) + torch.sum(trace, dim=1)
+
         return torch.mean(log_prob)
 
     @staticmethod

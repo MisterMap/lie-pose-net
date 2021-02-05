@@ -35,16 +35,17 @@ if arguments.seed is not None:
 # Make trainer
 trainer = pl.Trainer.from_argparse_args(arguments, logger=logger, deterministic=deterministic)
 
-# Make data module
-data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_folder,
-                                    arguments.batch_size, arguments.num_workers)
-
 # Load parameters
-params = load_hparams_from_yaml(arguments.config).model
+params = load_hparams_from_yaml(arguments.config)
 print("Load model from params \n" + str(params))
 
+# Make data module
+data_module_params = params.data_module
+data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_folder,
+                                    **data_module_params)
+
 # Make model
-model = ModelFactory().make_model(params)
+model = ModelFactory().make_model(params.model)
 
 # Load model
 model.load_state_dict(torch.load(arguments.model)['state_dict'])

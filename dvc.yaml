@@ -13,6 +13,7 @@ stages:
             - configs/pose_net.yaml:
                 - model
                 - max_epochs
+                - data_module
     test-pose-net:
         desc: Test Pose Net
         cmd: python eval.py --config configs/pose_net.yaml
@@ -24,6 +25,7 @@ stages:
         params:
             - configs/pose_net.yaml:
                 - model
+                - data_module
         outs:
             - trajectories.npy
         metrics:

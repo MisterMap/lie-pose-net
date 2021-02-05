@@ -36,7 +36,7 @@ class ModelFactory(object):
         if parameters.name == "pose_net_criterion":
             return PoseNetCriterion(**remove_name_key(parameters))
         elif parameters.name == "se3":
-            return SE3Criterion()
+            return SE3Criterion(**remove_name_key(parameters))
         if parameters.name == "poe_se3":
             return POESE3Criterion(**remove_name_key(parameters))
         if parameters.name == "param_poe_se3":
