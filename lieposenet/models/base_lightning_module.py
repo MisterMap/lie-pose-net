@@ -6,6 +6,7 @@ class BaseLightningModule(pl.LightningModule):
     def __init__(self, parameters):
         super().__init__()
         self.save_hyperparameters(parameters)
+        self._data_saver = None
 
     def loss(self, batch):
         raise NotImplementedError()
@@ -16,6 +17,9 @@ class BaseLightningModule(pl.LightningModule):
     def metrics(self, batch, output):
         raise NotImplementedError()
 
+    def additional_metrics(self):
+        raise NotImplementedError()
+
     def training_step(self, batch, batch_index):
         output, losses = self.loss(batch)
         train_losses = {}
@@ -24,8 +28,16 @@ class BaseLightningModule(pl.LightningModule):
         self.log_dict(train_losses)
         return losses["loss"]
 
+    def on_validation_epoch_start(self) -> None:
+        self._data_saver.clear()
+
+    def on_validation_epoch_end(self) -> None:
+        metrics = self.additional_metrics()
+        self.log_dict(metrics)
+
     def validation_step(self, batch, batch_index):
         output, losses = self.loss(batch)
+        self.save_test_data(batch, output, losses)
         metrics = self.metrics(batch, output)
         val_losses = {}
         for key, value in losses.items():

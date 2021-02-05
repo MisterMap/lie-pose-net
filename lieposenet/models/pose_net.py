@@ -52,7 +52,15 @@ class PoseNet(BaseLightningModule):
                                        self._data_saver["predicted_position"]])
         self.logger.log_figure("3d_trajectories", figure, self.global_step)
 
+    def additional_metrics(self):
+        metrics = calculate_metrics(self._data_saver)
+        result = {}
+        for key, value in metrics.items():
+            result[key] = torch.tensor(value)
+        return result
+
     def on_test_epoch_end(self):
+        self.show_images()
         self._data_saver.save()
 
     def forward(self, x):

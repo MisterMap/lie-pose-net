@@ -15,4 +15,3 @@ class DataSaver(dict):
         for key, value in self.items():
             dictionary[key] = value
         np.save(file, dictionary)
-

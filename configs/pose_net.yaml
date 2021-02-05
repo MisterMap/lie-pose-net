@@ -21,4 +21,4 @@ data_module:
     use_test: True
     num_workers: 4
 
-max_epochs: 10
+max_epochs: 1
