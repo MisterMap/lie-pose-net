@@ -15,7 +15,7 @@ train-pose-net:
         batch_size: 32
         use_test: true
         num_workers: 4
-      max_epochs: 20
+      max_epochs: 15
       model:
         name: pose_net
         feature_extractor:
@@ -23,8 +23,10 @@ train-pose-net:
           pretrained: true
         criterion:
           name: se3
+          rotation_base_error: 0.1
+          translation_base_error: 0.1
         feature_dimension: 2048
-        drop_rate: 0.2
+        drop_rate: 0.15
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
@@ -32,8 +34,8 @@ train-pose-net:
         bias: true
   outs:
   - path: models/pose_net.pth.ckpt
-    md5: 7eff02d5346a67ddcdbe709541abe689
-    size: 268930431
+    md5: 743898fbcc54949a99482dfb008df34f
+    size: 268930580
 test-pose-net:
   cmd: python eval.py --config configs/pose_net.yaml --model models/pose_net.pth.ckpt
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -46,8 +48,8 @@ test-pose-net:
     size: 102472
     nfiles: 47
   - path: models/pose_net.pth.ckpt
-    md5: 7eff02d5346a67ddcdbe709541abe689
-    size: 268930431
+    md5: 743898fbcc54949a99482dfb008df34f
+    size: 268930580
   params:
     configs/pose_net.yaml:
       data_module:
@@ -61,8 +63,10 @@ test-pose-net:
           pretrained: true
         criterion:
           name: se3
+          rotation_base_error: 0.1
+          translation_base_error: 0.1
         feature_dimension: 2048
-        drop_rate: 0.2
+        drop_rate: 0.15
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
@@ -70,8 +74,8 @@ test-pose-net:
         bias: true
   outs:
   - path: metrics.json
-    md5: 66316f05bfaf8b952fb35f5fb2532970
+    md5: d009cf11a910f30b93676f559c71b76c
     size: 198
   - path: trajectories.npy
-    md5: 153cfedc900b3742e801c2319e6a9399
+    md5: 1a4222a4029c83e47261ade08c48be38
     size: 336644
