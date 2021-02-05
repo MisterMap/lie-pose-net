@@ -17,4 +17,7 @@ setuptools
 wheel
 grpcio
 pytorch-lightning
--e git://github.com/MisterMap/liegroups.git#egg=elasticutils
+dvc
+dvc[gdrive]
+pyyaml>=5.4.1
+-e git://github.com/MisterMap/liegroups.git#egg=liegroups
