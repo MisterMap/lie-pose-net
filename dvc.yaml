@@ -31,3 +31,38 @@ stages:
         metrics:
             - metrics.json:
                 cache: false
+
+    train-fire:
+        desc: Train PoseNet on fire scene
+        cmd: python train.py --config configs/pose_net.yaml --dataset_name fire
+            --out models/fire_pose_net.pth --seed 1 --gpu 1 --log_every_n_steps 1
+        deps:
+            - train.py
+            - lieposenet
+        outs:
+            - models/fire_pose_net.pth.ckpt
+        params:
+            -   configs/pose_net.yaml:
+                - model
+                - max_epochs
+                - data_module
+    test-fire:
+        desc: Test Pose Net
+        cmd: python eval.py
+            --config configs/pose_net.yaml --dataset_name fire --result metrics/fire_metrics.json
+            --trajectories metrics/fire_trajectories.npy --model models/fire_pose_net.pth.ckpt --seed 1 --gpu 1
+            --log_every_n_steps 1
+        deps:
+            - eval.py
+            - lieposenet
+            - models/fire_pose_net.pth.ckpt
+        params:
+            - configs/pose_net.yaml:
+                - model
+                - data_module
+        outs:
+            - fire_trajectories.npy
+        metrics:
+            - metrics/fire_metrics.json:
+                cache: false
+

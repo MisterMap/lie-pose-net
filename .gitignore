@@ -35,6 +35,8 @@ mlruns
 *.rar
 *.gz
 *.npz
+*.txt
+*.db
 
 # Python models
 *.npy
