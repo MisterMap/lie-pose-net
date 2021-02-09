@@ -117,3 +117,81 @@ train-fire:
   - path: models/fire_pose_net.pth.ckpt
     md5: 914d78d2c2fcf0574fdd101694c377bb
     size: 268930292
+train-chess:
+  cmd: python train.py --config configs/pose_net.yaml --dataset_name chess --out models/chess_pose_net.pth
+    --seed 1 --gpu 1 --log_every_n_steps 1
+  deps:
+  - path: lieposenet
+    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
+    size: 103849
+    nfiles: 47
+  - path: train.py
+    md5: fb5134f26ef06de4bc0d4dc0de875864
+    size: 1839
+  params:
+    configs/pose_net.yaml:
+      data_module:
+        batch_size: 32
+        use_test: true
+        num_workers: 4
+      max_epochs: 15
+      model:
+        name: pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: se3
+        feature_dimension: 2048
+        drop_rate: 0.15
+        optimizer:
+          betas: 0.9 0.999
+          lr: 0.0001
+          weight_decay: 0.0005
+        bias: true
+  outs:
+  - path: models/chess_pose_net.pth.ckpt
+    md5: ab5330585ba5be0640d0fc04635c4deb
+    size: 268931019
+test-chess:
+  cmd: python eval.py --config configs/pose_net.yaml --dataset_name chess --result
+    metrics/chess_metrics.json --data_saver_path metrics/chess_trajectories.npy --model
+    models/chess_pose_net.pth.ckpt --seed 1 --gpu 1 --log_every_n_steps 1
+  deps:
+  - path: eval.py
+    md5: f4dae0d7273fb4ef256bda2228a1ae74
+    size: 2095
+  - path: lieposenet
+    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
+    size: 103849
+    nfiles: 47
+  - path: models/chess_pose_net.pth.ckpt
+    md5: ab5330585ba5be0640d0fc04635c4deb
+    size: 268931019
+  params:
+    configs/pose_net.yaml:
+      data_module:
+        batch_size: 32
+        use_test: true
+        num_workers: 4
+      model:
+        name: pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: se3
+        feature_dimension: 2048
+        drop_rate: 0.15
+        optimizer:
+          betas: 0.9 0.999
+          lr: 0.0001
+          weight_decay: 0.0005
+        bias: true
+  outs:
+  - path: metrics/chess_metrics.json
+    md5: 887047ab9c9c3775abc41c38182ec4ac
+    size: 199
+  - path: metrics/chess_trajectories.npy
+    md5: 5f3ce1fd12a32ba32be868d6de19f98b
+    size: 752777

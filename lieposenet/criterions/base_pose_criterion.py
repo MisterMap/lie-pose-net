@@ -14,3 +14,6 @@ class BasePoseCriterion(nn.Module):
 
     def rotation(self, predicted_position):
         raise NotImplementedError
+
+    def saved_data(self, predicted_position):
+        return {}

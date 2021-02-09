@@ -15,12 +15,12 @@ def remove_name_key(parameters):
 
 
 class ModelFactory(object):
-    def make_model(self, parameters):
+    def make_model(self, parameters, **kwargs):
         feature_extractor = self.make_feature_extractor(parameters.feature_extractor)
         criterion = self.make_criterion(parameters.criterion)
 
         if parameters.name == "pose_net":
-            return PoseNet(parameters, feature_extractor, criterion)
+            return PoseNet(parameters, feature_extractor, criterion, **kwargs)
         else:
             raise ValueError("Unknown model name: {}".format(parameters.name))
 

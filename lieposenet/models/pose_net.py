@@ -13,7 +13,7 @@ from ..utils.data_saver import DataSaver
 
 
 class PoseNet(BaseLightningModule):
-    def __init__(self, parameters, feature_extractor, criterion):
+    def __init__(self, parameters, feature_extractor, criterion, data_saver_path="trajectories.npy"):
         super(PoseNet, self).__init__(parameters)
 
         self.criterion = criterion
@@ -38,7 +38,7 @@ class PoseNet(BaseLightningModule):
                 if m.bias is not None:
                     nn.init.constant_(m.bias.data, 0)
 
-        self._data_saver = DataSaver()
+        self._data_saver = DataSaver(data_saver_path)
 
     def save_test_data(self, batch, output, losses):
         self._data_saver.add("truth_position", batch["position"][:, :3, 3])
@@ -46,6 +46,8 @@ class PoseNet(BaseLightningModule):
         self._data_saver.add("predicted_position", self.criterion.translation(output))
         self._data_saver.add("predicted_rotation", self.criterion.rotation(output))
         self._data_saver.add("output", output)
+        for key, value in self.criterion.saved_data(output).items():
+            self._data_saver.add(key, value)
 
     def show_images(self):
         figure = show_3d_trajectories([self._data_saver["truth_position"],

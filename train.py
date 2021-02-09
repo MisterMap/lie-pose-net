@@ -32,7 +32,8 @@ if arguments.seed is not None:
 params = load_hparams_from_yaml(arguments.config)
 checkpoint_callback = pl.callbacks.ModelCheckpoint(filepath=arguments.out)
 trainer = pl.Trainer.from_argparse_args(arguments, logger=logger, callbacks=[checkpoint_callback],
-                                        deterministic=deterministic, max_epochs=params.max_epochs)
+                                        deterministic=deterministic, max_epochs=params.max_epochs,
+                                        profiler="simple")
 
 # Make data module
 data_module_params = params.data_module

@@ -16,7 +16,7 @@ parser.add_argument("--dataset_name", type=str, default="chess")
 parser.add_argument("--seed", type=int, default=None)
 parser.add_argument("--model", type=str, default="model.pth")
 parser.add_argument("--result", type=str, default="metrics/metrics.json")
-parser.add_argument("--trajectories", type=str, default="metrics/trajectories.npy")
+parser.add_argument("--data_saver_path", type=str, default="metrics/trajectories.npy")
 
 parser = pl.Trainer.add_argparse_args(parser)
 arguments = parser.parse_args()
@@ -44,7 +44,7 @@ data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_fo
                                     **data_module_params)
 
 # Make model
-model = ModelFactory().make_model(params.model)
+model = ModelFactory().make_model(params.model, data_saver_path=arguments.data_saver_path)
 
 # Load model
 model.load_state_dict(torch.load(arguments.model)['state_dict'])

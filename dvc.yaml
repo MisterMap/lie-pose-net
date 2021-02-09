@@ -1,35 +1,36 @@
 stages:
-    train-pose-net:
-        desc: Train Pose Net
-        cmd: python train.py --config configs/pose_net.yaml
-            --out models/pose_net.pth --seed 1 --gpu 1 --log_every_n_steps 1
+    train-chess:
+        desc: Train PoseNet on chess scene
+        cmd: python train.py --config configs/pose_net.yaml --dataset_name chess
+            --out models/chess_pose_net.pth --seed 1 --gpu 1 --log_every_n_steps 1
         deps:
             - train.py
             - lieposenet
         outs:
-            - models/pose_net.pth.ckpt
-
+            - models/chess_pose_net.pth.ckpt
         params:
-            - configs/pose_net.yaml:
+            -   configs/pose_net.yaml:
                 - model
                 - max_epochs
                 - data_module
-    test-pose-net:
+    test-chess:
         desc: Test Pose Net
-        cmd: python eval.py --config configs/pose_net.yaml
-            --model models/pose_net.pth.ckpt --seed 1 --gpu 1 --log_every_n_steps 1
+        cmd: python eval.py
+            --config configs/pose_net.yaml --dataset_name chess --result metrics/chess_metrics.json
+            --data_saver_path metrics/chess_trajectories.npy --model models/chess_pose_net.pth.ckpt --seed 1 --gpu 1
+            --log_every_n_steps 1
         deps:
             - eval.py
             - lieposenet
-            - models/pose_net.pth.ckpt
+            - models/chess_pose_net.pth.ckpt
         params:
             - configs/pose_net.yaml:
                 - model
                 - data_module
         outs:
-            - trajectories.npy
+            - metrics/chess_trajectories.npy
         metrics:
-            - metrics.json:
+            - metrics/chess_metrics.json:
                 cache: false
 
     train-fire:
@@ -50,7 +51,7 @@ stages:
         desc: Test Pose Net
         cmd: python eval.py
             --config configs/pose_net.yaml --dataset_name fire --result metrics/fire_metrics.json
-            --trajectories metrics/fire_trajectories.npy --model models/fire_pose_net.pth.ckpt --seed 1 --gpu 1
+            --data_saver_path metrics/fire_trajectories.npy --model models/fire_pose_net.pth.ckpt --seed 1 --gpu 1
             --log_every_n_steps 1
         deps:
             - eval.py
@@ -61,7 +62,7 @@ stages:
                 - model
                 - data_module
         outs:
-            - fire_trajectories.npy
+            - metrics/fire_trajectories.npy
         metrics:
             - metrics/fire_metrics.json:
                 cache: false

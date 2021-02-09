@@ -95,3 +95,10 @@ class SE3Criterion(BasePoseCriterion):
     def rotation(self, predicted_position):
         # return quaternion_from_logq(predicted_position[:, 3:6])
         return torch.nn.functional.normalize(predicted_position[:, 3:7])
+
+    def saved_data(self, predicted_position):
+        logvar = predicted_position[:, 7:]
+        mean_matrix = self.mean_matrix(predicted_position[:, :7])
+        inverse_sigma_matrix = self.get_inverse_sigma_matrix(logvar)
+        return {"mean_matrix": mean_matrix,
+                "inverse_sigma_matrix": inverse_sigma_matrix}
