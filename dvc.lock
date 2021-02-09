@@ -195,3 +195,43 @@ test-chess:
   - path: metrics/chess_trajectories.npy
     md5: 5f3ce1fd12a32ba32be868d6de19f98b
     size: 752777
+pgo-train-chess:
+  cmd: python train.py --config configs/pgo_pose_net.yaml --dataset_scene chess --out
+    models/chess_pgo_pose_net.pth --seed 1 --gpu 1 --log_every_n_steps 1 --dataset_name
+    odom_seven_scenes
+  deps:
+  - path: lieposenet
+    md5: 3ac5e4e16ee651b0491b91085f4354ed.dir
+    size: 122307
+    nfiles: 57
+  - path: train.py
+    md5: 0842625cf3a4a2cb743e651ee9210c14
+    size: 1949
+  params:
+    configs/pgo_pose_net.yaml:
+      data_module:
+        batch_size: 32
+        use_test: true
+        num_workers: 4
+      max_epochs: 15
+      model:
+        name: pgo_pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: se3
+        pgo_optimizer:
+          linear_sigma: 0.02
+          angular_sigma: 0.02
+        feature_dimension: 2048
+        drop_rate: 0.15
+        optimizer:
+          betas: 0.9 0.999
+          lr: 0.0001
+          weight_decay: 0.0005
+        bias: true
+  outs:
+  - path: models/chess_pgo_pose_net.pth.ckpt
+    md5: b1f65147a268c8cd14ec2a6c702e33ab
+    size: 268930810

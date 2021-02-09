@@ -1,4 +1,19 @@
 stages:
+    pgo-train-chess:
+        desc: Train PoseNet on chess scene
+        cmd: python train.py --config configs/pgo_pose_net.yaml --dataset_scene chess
+            --out models/chess_pgo_pose_net.pth --seed 1 --gpu 1 --log_every_n_steps 1
+            --dataset_name odom_seven_scenes
+        deps:
+            - train.py
+            - lieposenet
+        outs:
+            - models/chess_pgo_pose_net.pth.ckpt
+        params:
+            -   configs/pgo_pose_net.yaml:
+                    - model
+                    - max_epochs
+                    - data_module
     train-chess:
         desc: Train PoseNet on chess scene
         cmd: python train.py --config configs/pose_net.yaml --dataset_name chess

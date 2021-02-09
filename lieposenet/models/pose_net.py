@@ -46,12 +46,14 @@ class PoseNet(BaseLightningModule):
         self._data_saver.add("predicted_position", self.criterion.translation(output))
         self._data_saver.add("predicted_rotation", self.criterion.rotation(output))
         self._data_saver.add("output", output)
+        self._data_saver.add("sequence", batch["sequence"])
+        self._data_saver.add("index", batch["index"])
         for key, value in self.criterion.saved_data(output).items():
             self._data_saver.add(key, value)
 
     def show_images(self):
-        figure = show_3d_trajectories([self._data_saver["truth_position"],
-                                       self._data_saver["predicted_position"]])
+        figure = show_3d_trajectories(self._data_saver["truth_position"],
+                                       self._data_saver["predicted_position"])
         self.logger.log_figure("3d_trajectories", figure, self.global_step)
 
     def additional_metrics(self):

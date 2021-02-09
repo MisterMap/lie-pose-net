@@ -16,12 +16,20 @@ def quaternion_angular_error(q1, q2):
     return theta
 
 
-def show_3d_trajectories(trajectories):
-    figure = plt.figure()
+def show_3d_trajectories(truth_trajectory, predicted_trajectory):
+    figure = plt.figure(figsize=(35, 15))
     ax = figure.add_subplot(1, 2, 2, projection='3d')
-    for trajectory in trajectories:
-        x, y, z = trajectory.T
-        ax.plot(x, y, z)
+    ss = 1
+    pred_poses = predicted_trajectory
+    targ_poses = truth_trajectory
+    z = np.vstack((pred_poses[::ss, 2].T, targ_poses[::ss, 2].T))
+    x = np.vstack((pred_poses[::ss, 0].T, targ_poses[::ss, 0].T))
+    y = np.vstack((pred_poses[::ss, 1].T, targ_poses[::ss, 1].T))
+    for xx, yy, zz in zip(x.T, y.T, z.T):
+        ax.plot(xx, yy, zs=zz, c='b')
+    ax.scatter(x[0, :], y[0, :], zs=z[0, :], c='r', depthshade=0)
+    ax.scatter(x[1, :], y[1, :], zs=z[1, :], c='g', depthshade=0)
+    ax.view_init(azim=119, elev=13)
     return figure
 
 

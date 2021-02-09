@@ -32,6 +32,7 @@ class BaseLightningModule(pl.LightningModule):
         self._data_saver.clear()
 
     def on_validation_epoch_end(self) -> None:
+        super().on_validation_epoch_end()
         metrics = self.additional_metrics()
         self.log_dict(metrics)
 

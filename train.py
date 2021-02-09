@@ -6,12 +6,11 @@ from lieposenet import ModelFactory
 from lieposenet.data import SevenScenesDataModule
 from lieposenet.utils import TensorBoardLogger, load_hparams_from_yaml
 
-parser = ArgumentParser(description="Run Pose MVAE model")
+parser = ArgumentParser(description="Run Lie pose net")
 parser.add_argument("--config", type=str, default="./configs/model.yaml")
+parser.add_argument("--dataset_name", type=str, default="seven_scenes")
 parser.add_argument("--dataset_folder", type=str, default="./data/7scenes")
-parser.add_argument("--dataset_name", type=str, default="chess")
-parser.add_argument("--batch_size", type=int, default=32)
-parser.add_argument("--num_workers", type=int, default=4)
+parser.add_argument("--dataset_scene", type=str, default="chess")
 parser.add_argument("--seed", type=int, default=None)
 parser.add_argument("--out", type=str, default="model.pth")
 
@@ -37,15 +36,18 @@ trainer = pl.Trainer.from_argparse_args(arguments, logger=logger, callbacks=[che
 
 # Make data module
 data_module_params = params.data_module
-data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_folder,
-                                    **data_module_params)
+data_module_params.scene = arguments.dataset_scene
+data_module_params.data_path = arguments.dataset_folder
+data_module_params.name = arguments.dataset_name
+data_module_params.seed = arguments.seed
+data_module = SevenScenesDataModule(data_module_params)
 
 # Load parameters
 model_params = params.model
 print("Load model from params \n" + str(model_params))
 
 # Make model
-model = ModelFactory().make_model(model_params)
+model = ModelFactory().make_model(model_params, train_dataset=data_module.get_train_dataset())
 
 print("Start training")
 trainer.fit(model, data_module)

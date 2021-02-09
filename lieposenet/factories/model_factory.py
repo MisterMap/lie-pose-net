@@ -1,4 +1,5 @@
 from ..models.pose_net import PoseNet
+from ..models.pgo_posenet import PGOPoseNet
 from ..criterions.pose_net_criterion import PoseNetCriterion
 from ..criterions.se3_criterion import SE3Criterion
 from ..criterions.poe_se3_criterion import POESE3Criterion
@@ -20,7 +21,11 @@ class ModelFactory(object):
         criterion = self.make_criterion(parameters.criterion)
 
         if parameters.name == "pose_net":
-            return PoseNet(parameters, feature_extractor, criterion, **kwargs)
+            return PoseNet(parameters, feature_extractor=feature_extractor, criterion=criterion, **kwargs)
+        elif parameters.name == "pgo_pose_net":
+            pgo_optimizer = self.make_pgo(parameters.pgo_optimizer)
+            return PGOPoseNet(parameters, feature_extractor=feature_extractor, criterion=criterion,
+                              pgo_optimizer=pgo_optimizer, **kwargs)
         else:
             raise ValueError("Unknown model name: {}".format(parameters.name))
 
@@ -43,3 +48,8 @@ class ModelFactory(object):
             return ParametrizedPOESE3Criterion(**remove_name_key(parameters))
         else:
             raise ValueError("Unknown criterion name: {}".format(parameters.name))
+
+    @staticmethod
+    def make_pgo(parameters):
+        from ..pose_graph.pgo import PGO
+        return PGO(**parameters)

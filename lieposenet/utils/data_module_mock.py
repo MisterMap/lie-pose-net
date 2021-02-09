@@ -16,3 +16,6 @@ class DataModuleMock(pl.LightningDataModule):
 
     def test_dataloader(self):
         return DataLoaderMock(self._data_module.test_dataloader())
+
+    def get_train_dataset(self):
+        return self._data_module.get_train_dataset()

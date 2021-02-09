@@ -15,7 +15,7 @@ from .utils import load_image
 
 class SevenScenes(data.Dataset):
     def __init__(self, scene, data_path, train, transform=None,
-                 target_transform=None, mode=0, seed=7, skip_images=False,):
+                 target_transform=None, mode=0, seed=7, skip_images=False, **kwargs):
         """
         :param scene: scene name ['chess', 'pumpkin', ...]
         :param data_path: root 7scenes data directory.
@@ -31,23 +31,16 @@ class SevenScenes(data.Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.skip_images = skip_images
+        self.color_images = {}
+        self.depth_images = {}
+        self.positions = {}
+        self.sequences = []
+        self.indexes = []
+
         np.random.seed(seed)
-
-        # directories
         base_directory = osp.join(osp.expanduser(data_path), scene)
-
-        # decide which sequences to use
-        if train:
-            split_file = osp.join(base_directory, 'TrainSplit.txt')
-        else:
-            split_file = osp.join(base_directory, 'TestSplit.txt')
-        with open(split_file, 'r') as fd:
-            sequences = [int(x.split('sequence')[-1]) for x in fd if not x.startswith('#')]
-
-        # read positions and collect image names
-        self.color_images = []
-        self.depth_images = []
-        self.positions = []
+        self._base_directory = base_directory
+        sequences = self.get_sequences(base_directory, train)
         for sequence in sequences:
             sequence_directory = osp.join(base_directory, 'seq-{:02d}'.format(sequence))
             pose_filenames = [x for x in os.listdir(osp.join(sequence_directory, '.')) if x.find('pose') >= 0]
@@ -59,36 +52,48 @@ class SevenScenes(data.Dataset):
                             for i in frame_indexes]
             depth_images = [osp.join(sequence_directory, 'frame-{:06d}.depth.png'.format(i))
                             for i in frame_indexes]
-            self.color_images.extend(color_images)
-            self.depth_images.extend(depth_images)
-            self.positions.extend(positions)
-        self.positions = np.array(self.positions)
+            self.color_images[sequence] = color_images
+            self.depth_images[sequence] = depth_images
+            self.positions[sequence] = np.array(positions)
+            self.sequences.extend([sequence] * len(frame_indexes))
+            self.indexes.extend(frame_indexes)
+
+    def get_sequences(self, base_directory, train):
+        if train:
+            split_file = osp.join(base_directory, 'TrainSplit.txt')
+        else:
+            split_file = osp.join(base_directory, 'TestSplit.txt')
+        with open(split_file, 'r') as fd:
+            sequences = [int(x.split('sequence')[-1]) for x in fd if not x.startswith('#')]
+        return sequences
 
     def __getitem__(self, index):
+        sequence = self.sequences[index]
+        index = self.indexes[index]
         pose = None
         if self.skip_images:
             image = None
-            pose = self.positions[index]
+            pose = self.positions[sequence][index]
         elif self.mode == 0:
             image = None
             while image is None:
-                image = load_image(self.color_images[index])
-                pose = self.positions[index]
+                image = load_image(self.color_images[sequence][index])
+                pose = self.positions[sequence][index]
                 index += 1
             index -= 1
         elif self.mode == 1:
             image = None
             while image is None:
-                image = load_image(self.depth_images[index])
-                pose = self.positions[index]
+                image = load_image(self.depth_images[sequence][index])
+                pose = self.positions[sequence][index]
                 index += 1
             index -= 1
         elif self.mode == 2:
             c_img = None
             d_img = None
             while (c_img is None) or (d_img is None):
-                c_img = load_image(self.color_images[index])
-                d_img = load_image(self.depth_images[index])
+                c_img = load_image(self.color_images[sequence][index])
+                d_img = load_image(self.depth_images[sequence][index])
                 pose = self.positions[index]
                 index += 1
             image = [c_img, d_img]
@@ -110,7 +115,9 @@ class SevenScenes(data.Dataset):
                 image = self.transform(image)
 
         return {"image": image,
-                "position": pose}
+                "position": pose,
+                "sequence": sequence,
+                "index": index}
 
     def __len__(self):
-        return self.positions.shape[0]
+        return len(self.sequences)

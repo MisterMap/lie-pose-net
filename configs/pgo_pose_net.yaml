@@ -1,0 +1,30 @@
+model:
+    name: pgo_pose_net
+    feature_extractor:
+        name: resnet34
+        pretrained: True
+    criterion:
+        name: se3
+#        rotation_base_error: 0.1
+#        translation_base_error: 0.1
+#        rotation_koef: -3.0
+    pgo_optimizer:
+        linear_sigma: 0.02
+        angular_sigma: 0.02
+    feature_dimension: 2048
+    drop_rate: 0.15
+    optimizer:
+        betas: 0.9 0.999
+        lr: 0.0001
+        weight_decay: 0.0005
+#    scheduler:
+#        step_size: 2
+#        gamma: 0.5
+    bias: True
+
+data_module:
+    batch_size: 32
+    use_test: True
+    num_workers: 4
+
+max_epochs: 15
