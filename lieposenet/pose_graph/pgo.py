@@ -38,12 +38,12 @@ class PGO(object):
             odometry_delta = self.se3_position(odometry_delta)
             self._graph.add(BetweenFactor(key('x', int(odometry_indexes[i])), key('x', int(odometry_indexes[i + 1])),
                                           odometry_delta, odometry_loss))
-            if not self._initials.exists(key("x", int(odometry_indexes[i]))):
-                self._initials.add(key("x", int(odometry_indexes[i])),
-                                   self.se3_position(odometry_positions[i]))
-            if not self._initials.exists(key("x", int(odometry_indexes[i + 1]))):
-                self._initials.add(key("x", int(odometry_indexes[i + 1])),
-                                   self.se3_position(odometry_positions[i + 1]))
+            # if not self._initials.exists(key("x", int(odometry_indexes[i]))):
+            #     self._initials.add(key("x", int(odometry_indexes[i])),
+            #                        self.se3_position(odometry_positions[i]))
+            # if not self._initials.exists(key("x", int(odometry_indexes[i + 1]))):
+            #     self._initials.add(key("x", int(odometry_indexes[i + 1])),
+            #                        self.se3_position(odometry_positions[i + 1]))
 
     def optimize(self):
         optimizer_param = LevenbergMarquardtOptimizerParams()
@@ -53,6 +53,6 @@ class PGO(object):
         status = optimizer.optimize(self._graph, self._initials, results)
         if status != NonlinearOptimizationStatus.SUCCESS:
             print("optimization error: ", status)
-        optimized_trajectory = [results.at(i).matrix() for i in self._measurement_indexes]
+        optimized_trajectory = [results.at(key('x', i)).matrix() for i in self._measurement_indexes]
         optimized_trajectory = np.array(optimized_trajectory)
         return optimized_trajectory

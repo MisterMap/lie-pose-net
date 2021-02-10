@@ -201,8 +201,8 @@ pgo-train-chess:
     odom_seven_scenes
   deps:
   - path: lieposenet
-    md5: 3ac5e4e16ee651b0491b91085f4354ed.dir
-    size: 122307
+    md5: ff9c84390bb42b62d77dd2f7dadd2464.dir
+    size: 122802
     nfiles: 57
   - path: train.py
     md5: 0842625cf3a4a2cb743e651ee9210c14
@@ -222,10 +222,10 @@ pgo-train-chess:
         criterion:
           name: se3
         pgo_optimizer:
-          linear_sigma: 0.02
-          angular_sigma: 0.02
+          linear_sigma: 0.01
+          angular_sigma: 0.01
         feature_dimension: 2048
-        drop_rate: 0.15
+        drop_rate: 0
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
@@ -233,5 +233,5 @@ pgo-train-chess:
         bias: true
   outs:
   - path: models/chess_pgo_pose_net.pth.ckpt
-    md5: b1f65147a268c8cd14ec2a6c702e33ab
-    size: 268930810
+    md5: 8dd2f8eb37dbef5023c2179bb65d740c
+    size: 268930427
