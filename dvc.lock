@@ -122,9 +122,9 @@ train-chess:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: 5e28861a6544946f3250eb804aad94d3.dir
+    size: 111511
+    nfiles: 52
   - path: train.py
     md5: fb5134f26ef06de4bc0d4dc0de875864
     size: 1839
@@ -143,16 +143,17 @@ train-chess:
         criterion:
           name: se3
         feature_dimension: 2048
-        drop_rate: 0.15
+        drop_rate: 0
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
           weight_decay: 0.0005
         bias: true
+        attention: true
   outs:
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: efc0c54945007c214c879d7638f0540b
+    size: 294138340
 test-chess:
   cmd: python eval.py --config configs/pose_net.yaml --dataset_name chess --result
     metrics/chess_metrics.json --data_saver_path metrics/chess_trajectories.npy --model
@@ -162,12 +163,12 @@ test-chess:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: 5e28861a6544946f3250eb804aad94d3.dir
+    size: 111511
+    nfiles: 52
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: efc0c54945007c214c879d7638f0540b
+    size: 294138340
   params:
     configs/pose_net.yaml:
       data_module:
@@ -182,16 +183,17 @@ test-chess:
         criterion:
           name: se3
         feature_dimension: 2048
-        drop_rate: 0.15
+        drop_rate: 0
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
           weight_decay: 0.0005
         bias: true
+        attention: true
   outs:
   - path: metrics/chess_metrics.json
-    md5: 887047ab9c9c3775abc41c38182ec4ac
-    size: 199
+    md5: 8edcdc0c90a3c5b5f8279e2d85ea2d75
+    size: 200
   - path: metrics/chess_trajectories.npy
-    md5: 5f3ce1fd12a32ba32be868d6de19f98b
+    md5: 38a8a3d92dedf2b7281d3d81365acc0d
     size: 752777

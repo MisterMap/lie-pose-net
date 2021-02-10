@@ -1,1 +1,1 @@
-{"test_loss": -4.794497013092041, "position_error": 0.24770089983940125, "rotation_error": 6.375616073608398, "median_position_error": 0.21955284476280212, "median_rotation_error": 5.359713901619298}
+{"test_loss": -5.3534932136535645, "position_error": 0.2003238946199417, "rotation_error": 6.0986738204956055, "median_position_error": 0.16651862859725952, "median_rotation_error": 5.181148851053069}

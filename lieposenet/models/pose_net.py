@@ -10,6 +10,7 @@ from .base_lightning_module import BaseLightningModule
 from ..utils.pose_net_result_evaluator import *
 from ..utils.torch_math import *
 from ..utils.data_saver import DataSaver
+from .attention import AttentionBlock
 
 
 class PoseNet(BaseLightningModule):
@@ -24,6 +25,9 @@ class PoseNet(BaseLightningModule):
         self.feature_extractor.fc = nn.Linear(feature_extractor_output_dimension, parameters.feature_dimension)
 
         self.final_fc = nn.Linear(parameters.feature_dimension, criterion.position_dimension, bias=parameters.bias)
+
+        if parameters.attention:
+            self.attention = AttentionBlock(parameters.feature_dimension)
 
         # initialize
         if parameters.feature_extractor.pretrained:
@@ -68,6 +72,9 @@ class PoseNet(BaseLightningModule):
     def forward(self, x):
         x = self.feature_extractor(x)
         x = F.relu(x)
+        if self.hparams.attention:
+            x = self.attention(x.view(x.size(0), -1))
+
         if self.hparams.drop_rate > 0:
             x = F.dropout(x, p=self.hparams.drop_rate, training=self.training)
 
