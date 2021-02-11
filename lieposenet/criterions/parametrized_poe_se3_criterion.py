@@ -17,4 +17,6 @@ class ParametrizedPOESE3Criterion(POESE3Criterion):
         global_matrix = super().mean_matrix(self._global_positions)
         batch_size = local_matrix.shape[0] // self._head_count
         global_matrix = torch.repeat_interleave(global_matrix, batch_size, dim=0)
+        print(global_matrix.shape)
+        print(local_matrix.shape)
         return torch.bmm(global_matrix, inverse_pose_matrix(local_matrix))

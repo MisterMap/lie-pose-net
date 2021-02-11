@@ -10,8 +10,8 @@ from .base_lightning_module import BaseLightningModule
 from ..utils.pose_net_result_evaluator import *
 from ..utils.torch_math import *
 from ..utils.data_saver import DataSaver
-from .attention import AttentionBlock
-
+from .multi_head_attention import MultiHeadAttentionLayer
+import torch.optim
 
 class PoseNet(BaseLightningModule):
     def __init__(self, parameters, feature_extractor, criterion, data_saver_path="trajectories.npy"):
@@ -20,6 +20,8 @@ class PoseNet(BaseLightningModule):
         self.criterion = criterion
         # replace the last FC layer in feature extractor
         self.feature_extractor = feature_extractor
+        for parameter in self.feature_extractor.parameters():
+            parameter.requires_grad = False
         self.feature_extractor.avgpool = nn.AdaptiveAvgPool2d(1)
         feature_extractor_output_dimension = self.feature_extractor.fc.in_features
         self.feature_extractor.fc = nn.Linear(feature_extractor_output_dimension, parameters.feature_dimension)
@@ -27,7 +29,7 @@ class PoseNet(BaseLightningModule):
         self.final_fc = nn.Linear(parameters.feature_dimension, criterion.position_dimension, bias=parameters.bias)
 
         if parameters.attention:
-            self.attention = AttentionBlock(parameters.feature_dimension)
+            self.attention = MultiHeadAttentionLayer(parameters.feature_dimension, 8)
 
         # initialize
         if parameters.feature_extractor.pretrained:

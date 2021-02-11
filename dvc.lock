@@ -119,15 +119,15 @@ train-fire:
     size: 268930292
 train-chess:
   cmd: python train.py --config configs/pose_net.yaml --dataset_name chess --out models/chess_pose_net.pth
-    --seed 1 --gpu 1 --log_every_n_steps 1
+    --seed 1 --gpu 1 --log_every_n_steps 1 --checkpoint models/init_chess_pose_net.pth.ckpt
   deps:
   - path: lieposenet
-    md5: 5e28861a6544946f3250eb804aad94d3.dir
-    size: 111511
-    nfiles: 52
+    md5: 29b8eb2bd4bd5bf4acc00483583c7e84.dir
+    size: 117292
+    nfiles: 54
   - path: train.py
-    md5: fb5134f26ef06de4bc0d4dc0de875864
-    size: 1839
+    md5: 3c29530c2bb2621087151d4df80d2cb6
+    size: 2037
   params:
     configs/pose_net.yaml:
       data_module:
@@ -142,18 +142,20 @@ train-chess:
           pretrained: true
         criterion:
           name: se3
+          rotation_base_error: 0.03
+          translation_base_error: 1
         feature_dimension: 2048
-        drop_rate: 0
+        drop_rate: 0.15
         optimizer:
-          betas: 0.9 0.999
-          lr: 0.0001
+          betas: 0.9 0.9
+          lr: 5e-05
           weight_decay: 0.0005
         bias: true
         attention: true
   outs:
   - path: models/chess_pose_net.pth.ckpt
-    md5: efc0c54945007c214c879d7638f0540b
-    size: 294138340
+    md5: 5bb72c0628a013b46e1cadab96fc3098
+    size: 300020685
 test-chess:
   cmd: python eval.py --config configs/pose_net.yaml --dataset_name chess --result
     metrics/chess_metrics.json --data_saver_path metrics/chess_trajectories.npy --model
@@ -163,12 +165,12 @@ test-chess:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: 5e28861a6544946f3250eb804aad94d3.dir
-    size: 111511
-    nfiles: 52
+    md5: 29b8eb2bd4bd5bf4acc00483583c7e84.dir
+    size: 117292
+    nfiles: 54
   - path: models/chess_pose_net.pth.ckpt
-    md5: efc0c54945007c214c879d7638f0540b
-    size: 294138340
+    md5: 5bb72c0628a013b46e1cadab96fc3098
+    size: 300020685
   params:
     configs/pose_net.yaml:
       data_module:
@@ -182,18 +184,20 @@ test-chess:
           pretrained: true
         criterion:
           name: se3
+          rotation_base_error: 0.03
+          translation_base_error: 1
         feature_dimension: 2048
-        drop_rate: 0
+        drop_rate: 0.15
         optimizer:
-          betas: 0.9 0.999
-          lr: 0.0001
+          betas: 0.9 0.9
+          lr: 5e-05
           weight_decay: 0.0005
         bias: true
         attention: true
   outs:
   - path: metrics/chess_metrics.json
-    md5: 8edcdc0c90a3c5b5f8279e2d85ea2d75
-    size: 200
+    md5: 89546832541093e714f963999688c1b5
+    size: 198
   - path: metrics/chess_trajectories.npy
-    md5: 38a8a3d92dedf2b7281d3d81365acc0d
+    md5: 378bcb5567fc545b2de1de59776fd20b
     size: 752777

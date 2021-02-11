@@ -3,6 +3,7 @@ stages:
         desc: Train PoseNet on chess scene
         cmd: python train.py --config configs/pose_net.yaml --dataset_name chess
             --out models/chess_pose_net.pth --seed 1 --gpu 1 --log_every_n_steps 1
+            --checkpoint models/init_chess_pose_net.pth.ckpt
         deps:
             - train.py
             - lieposenet
