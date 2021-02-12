@@ -2,11 +2,13 @@ from liegroups.torch import SE3
 
 from .base_pose_criterion import BasePoseCriterion
 from ..utils.torch_math import *
+import torch.nn as nn
 
 
 class SE3Criterion(BasePoseCriterion):
     def __init__(self, rotation_base_error=0, translation_base_error=0):
         super().__init__()
+        self._loss = nn.MSELoss(reduction="none")
         self._base_covariance = torch.tensor([translation_base_error ** 2, translation_base_error ** 2,
                                               translation_base_error ** 2, rotation_base_error ** 2,
                                               rotation_base_error ** 2, rotation_base_error ** 2])
@@ -39,8 +41,8 @@ class SE3Criterion(BasePoseCriterion):
 
         self._base_covariance = self._base_covariance.to(value_matrix.device)
         trace = torch.sum(inverse_sigma_matrix * inverse_sigma_matrix, dim=2) * self._base_covariance
-        log_prob = torch.sum(delta_log ** 2 / 2., dim=1
-                             ) + 0.5 * log_determinant + 6 * math.log(math.sqrt(2 * math.pi)) + torch.sum(trace, dim=1)
+        loss = torch.sum(self._loss(delta_log, torch.zeros_like(delta_log)), dim=1)
+        log_prob = loss + 0.5 * log_determinant + 6 * math.log(math.sqrt(2 * math.pi)) + torch.sum(trace, dim=1)
 
         return torch.mean(log_prob)
 

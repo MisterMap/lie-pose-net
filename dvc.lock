@@ -122,9 +122,9 @@ train-chess:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: 41bae8a90a22cac43dbc51c97ee9c8b0.dir
+    size: 116353
+    nfiles: 53
   - path: train.py
     md5: fb5134f26ef06de4bc0d4dc0de875864
     size: 1839
@@ -151,8 +151,8 @@ train-chess:
         bias: true
   outs:
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: ba746669c3caa10cae903d9ca4d9ba11
+    size: 268930506
 test-chess:
   cmd: python eval.py --config configs/pose_net.yaml --dataset_name chess --result
     metrics/chess_metrics.json --data_saver_path metrics/chess_trajectories.npy --model
@@ -162,12 +162,12 @@ test-chess:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: 41bae8a90a22cac43dbc51c97ee9c8b0.dir
+    size: 116353
+    nfiles: 53
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: ba746669c3caa10cae903d9ca4d9ba11
+    size: 268930506
   params:
     configs/pose_net.yaml:
       data_module:
@@ -190,8 +190,8 @@ test-chess:
         bias: true
   outs:
   - path: metrics/chess_metrics.json
-    md5: 887047ab9c9c3775abc41c38182ec4ac
-    size: 199
+    md5: 06c267e53babb6c7faf2c0fca157cb43
+    size: 197
   - path: metrics/chess_trajectories.npy
-    md5: 5f3ce1fd12a32ba32be868d6de19f98b
+    md5: 7006c6d3dd273e5c019d2b33b2be68ff
     size: 752777
