@@ -79,7 +79,9 @@ class PoseNet(BaseLightningModule):
         predicted_position = self.forward(image)
         target_position = batch["position"]
         loss = self.criterion(predicted_position, target_position)
-        return predicted_position, {"loss": loss}
+        losses = self.criterion.additional_losses()
+        losses["loss"] = loss
+        return predicted_position, losses
 
     def metrics(self, batch, output):
         truth_position = batch["position"][:, :3, 3]

@@ -122,9 +122,9 @@ train-chess:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: ad956b54c6d05464ca0d65c9e05268ec.dir
+    size: 122651
+    nfiles: 55
   - path: train.py
     md5: fb5134f26ef06de4bc0d4dc0de875864
     size: 1839
@@ -141,7 +141,10 @@ train-chess:
           name: resnet34
           pretrained: true
         criterion:
-          name: se3
+          name: dncl_poe_se3
+          head_count: 10
+          lambda_koef: 1
+          fix_logvar: true
         feature_dimension: 2048
         drop_rate: 0.15
         optimizer:
@@ -151,8 +154,8 @@ train-chess:
         bias: true
   outs:
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: ad85f0e84ad4a828ea715d65bb926d70
+    size: 275127041
 test-chess:
   cmd: python eval.py --config configs/pose_net.yaml --dataset_name chess --result
     metrics/chess_metrics.json --data_saver_path metrics/chess_trajectories.npy --model
@@ -162,12 +165,12 @@ test-chess:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: c65e2887ce1487d43a5e978faf26cc4e.dir
+    size: 122220
+    nfiles: 55
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: 21cccbfd27bbe59f8ec4a3a0d4180ede
+    size: 275128603
   params:
     configs/pose_net.yaml:
       data_module:
@@ -180,7 +183,10 @@ test-chess:
           name: resnet34
           pretrained: true
         criterion:
-          name: se3
+          name: dncl_poe_se3
+          head_count: 10
+          lambda_koef: 1.5
+          fix_logvar: true
         feature_dimension: 2048
         drop_rate: 0.15
         optimizer:
@@ -190,8 +196,8 @@ test-chess:
         bias: true
   outs:
   - path: metrics/chess_metrics.json
-    md5: 887047ab9c9c3775abc41c38182ec4ac
-    size: 199
+    md5: cbc6c172862b8260793ec059b0b346c4
+    size: 237
   - path: metrics/chess_trajectories.npy
-    md5: 5f3ce1fd12a32ba32be868d6de19f98b
-    size: 752777
+    md5: 8c2cf7156b921b69dc7f7be5b52bf342
+    size: 2768778

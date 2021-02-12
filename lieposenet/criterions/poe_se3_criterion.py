@@ -5,8 +5,8 @@ from ..utils.torch_math import *
 
 
 class POESE3Criterion(SE3Criterion):
-    def __init__(self, head_count=10):
-        super().__init__()
+    def __init__(self, head_count=10, **kwargs):
+        super().__init__(**kwargs)
         self._head_count = head_count
 
     @property
@@ -33,7 +33,9 @@ class POESE3Criterion(SE3Criterion):
         inverse_covariance_matrix = torch.bmm(inverse_sigma_matrix.transpose(1, 2), inverse_sigma_matrix)
         result_inverse_covariance_matrix = torch.sum(inverse_covariance_matrix.reshape(-1, self._head_count, 6, 6),
                                                      dim=1)
+        # print("result_inverse_covariance_matrix", result_inverse_covariance_matrix)
         result_covariance_matrix = torch.inverse(result_inverse_covariance_matrix)
+        # print("result_covariance_matrix", result_covariance_matrix)
         factors = torch.bmm(result_covariance_matrix.repeat_interleave(self._head_count, 0), inverse_covariance_matrix)
         scaled_log_mean = torch.bmm(factors, log_mean[:, :, None])[:, :, 0]
         result_log_mean = torch.sum(scaled_log_mean.reshape(-1, self._head_count, 6), dim=1)

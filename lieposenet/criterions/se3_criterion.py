@@ -2,14 +2,21 @@ from liegroups.torch import SE3
 
 from .base_pose_criterion import BasePoseCriterion
 from ..utils.torch_math import *
+import torch.nn as nn
 
 
 class SE3Criterion(BasePoseCriterion):
-    def __init__(self, rotation_base_error=0, translation_base_error=0):
+    def __init__(self, rotation_base_error=0, translation_base_error=0, fix_logvar=False):
         super().__init__()
         self._base_covariance = torch.tensor([translation_base_error ** 2, translation_base_error ** 2,
                                               translation_base_error ** 2, rotation_base_error ** 2,
                                               rotation_base_error ** 2, rotation_base_error ** 2])
+        self._logvar = None
+        if fix_logvar:
+            x = torch.zeros(21)
+            x[3:6] = -3
+            self._logvar = nn.Parameter(x)
+
 
     @property
     def position_dimension(self):
@@ -40,12 +47,12 @@ class SE3Criterion(BasePoseCriterion):
         self._base_covariance = self._base_covariance.to(value_matrix.device)
         trace = torch.sum(inverse_sigma_matrix * inverse_sigma_matrix, dim=2) * self._base_covariance
         log_prob = torch.sum(delta_log ** 2 / 2., dim=1
-                             ) + 0.5 * log_determinant + 6 * math.log(math.sqrt(2 * math.pi)) + torch.sum(trace, dim=1)
+                             ) + 0.5 * log_determinant + torch.sum(trace, dim=1)
 
         return torch.mean(log_prob)
 
-    @staticmethod
-    def get_sigma_matrix(logvar, dim=6):
+    def get_sigma_matrix(self, logvar, dim=6):
+
         matrix = []
         for i in range(dim):
             matrix.append([])
@@ -72,12 +79,18 @@ class SE3Criterion(BasePoseCriterion):
                 result[:, i, j] = matrix[i][j]
         return result
 
-    @staticmethod
-    def get_logvar_determinant(logvar):
+    def get_logvar_determinant(self, logvar):
+        if self._logvar is not None:
+            new_logvar = torch.zeros_like(logvar)
+            new_logvar[:, :6] = -torch.relu(-logvar[:, :6] + self._logvar[:6]) + self._logvar[:6]
+            new_logvar[:, 6:] = logvar[:, 6:]
         return torch.sum(logvar[:, :6], dim=1)
 
-    @staticmethod
-    def get_inverse_sigma_matrix(logvar, dim=6):
+    def get_inverse_sigma_matrix(self, logvar, dim=6):
+        if self._logvar is not None:
+            new_logvar = torch.zeros_like(logvar)
+            new_logvar[:, :6] = -torch.relu(-logvar[:, :6] + self._logvar[:6]) + self._logvar[:6]
+            new_logvar[:, 6:] = logvar[:, 6:]
         matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
         k = 0
         for i in range(dim):

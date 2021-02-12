@@ -17,3 +17,7 @@ class BasePoseCriterion(nn.Module):
 
     def saved_data(self, predicted_position):
         return {}
+
+    def additional_losses(self):
+        return {}
+

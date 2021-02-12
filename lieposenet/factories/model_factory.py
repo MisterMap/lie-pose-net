@@ -3,6 +3,7 @@ from ..criterions.pose_net_criterion import PoseNetCriterion
 from ..criterions.se3_criterion import SE3Criterion
 from ..criterions.poe_se3_criterion import POESE3Criterion
 from ..criterions.parametrized_poe_se3_criterion import ParametrizedPOESE3Criterion
+from ..criterions.dncl_poe_se3_criterion import DNCLPoESE3Criterion
 from torchvision import models
 
 
@@ -37,9 +38,11 @@ class ModelFactory(object):
             return PoseNetCriterion(**remove_name_key(parameters))
         elif parameters.name == "se3":
             return SE3Criterion(**remove_name_key(parameters))
-        if parameters.name == "poe_se3":
+        elif parameters.name == "poe_se3":
             return POESE3Criterion(**remove_name_key(parameters))
-        if parameters.name == "param_poe_se3":
+        elif parameters.name == "param_poe_se3":
             return ParametrizedPOESE3Criterion(**remove_name_key(parameters))
+        elif parameters.name == "dncl_poe_se3":
+            return DNCLPoESE3Criterion(**remove_name_key(parameters))
         else:
             raise ValueError("Unknown criterion name: {}".format(parameters.name))

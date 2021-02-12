@@ -4,7 +4,10 @@ model:
         name: resnet34
         pretrained: True
     criterion:
-        name: se3
+        name: dncl_poe_se3
+        head_count: 10
+        lambda_koef: 1
+        fix_logvar: True
 #        rotation_base_error: 0.1
 #        translation_base_error: 0.1
 #        rotation_koef: -3.0
@@ -15,7 +18,7 @@ model:
         lr: 0.0001
         weight_decay: 0.0005
 #    scheduler:
-#        step_size: 2
+#        step_size: 3
 #        gamma: 0.5
     bias: True
 
