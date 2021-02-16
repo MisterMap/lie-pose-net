@@ -14,7 +14,7 @@ class SE3Criterion(BasePoseCriterion):
         self._logvar = None
         if fix_logvar:
             x = torch.zeros(21)
-            x[3:6] = -3
+            x[:6] = -4
             self._logvar = nn.Parameter(x)
 
 
@@ -52,7 +52,6 @@ class SE3Criterion(BasePoseCriterion):
         return torch.mean(log_prob)
 
     def get_sigma_matrix(self, logvar, dim=6):
-
         matrix = []
         for i in range(dim):
             matrix.append([])
@@ -80,17 +79,27 @@ class SE3Criterion(BasePoseCriterion):
         return result
 
     def get_logvar_determinant(self, logvar):
+        return self._get_logvar_determinant(self.calculate_logvar(logvar))
+
+    def calculate_logvar(self, logvar):
         if self._logvar is not None:
-            new_logvar = torch.zeros_like(logvar)
-            new_logvar[:, :6] = -torch.relu(-logvar[:, :6] + self._logvar[:6]) + self._logvar[:6]
-            new_logvar[:, 6:] = logvar[:, 6:]
+            old_logvar = logvar
+            logvar = torch.zeros_like(logvar)
+            base_logvar = torch.repeat_interleave(self._logvar[None, :6], old_logvar.shape[0], dim=0)
+            stacked_logvar = torch.stack([old_logvar[:, :6], base_logvar], dim=2)
+            logvar[:, :6] = torch.logsumexp(stacked_logvar, dim=2)
+            logvar[:, 6:] = old_logvar[:, 6:]
+        return logvar
+
+    @staticmethod
+    def _get_logvar_determinant(logvar):
         return torch.sum(logvar[:, :6], dim=1)
 
     def get_inverse_sigma_matrix(self, logvar, dim=6):
-        if self._logvar is not None:
-            new_logvar = torch.zeros_like(logvar)
-            new_logvar[:, :6] = -torch.relu(-logvar[:, :6] + self._logvar[:6]) + self._logvar[:6]
-            new_logvar[:, 6:] = logvar[:, 6:]
+        return self._get_inverse_sigma_matrix(self.calculate_logvar(logvar),  dim=dim)
+
+    @staticmethod
+    def _get_inverse_sigma_matrix(logvar, dim=6):
         matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
         k = 0
         for i in range(dim):
@@ -98,7 +107,8 @@ class SE3Criterion(BasePoseCriterion):
             k += 1
         for i in range(dim):
             for j in range(i + 1, dim):
-                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
+                # matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
+                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * logvar[:, k]
                 k += 1
         return matrix
 

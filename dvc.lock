@@ -86,44 +86,8 @@ train-fire:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: ceee33cedeed84daf9c06760e7c301b4.dir
-    size: 102472
-    nfiles: 47
-  - path: train.py
-    md5: ceb05b50de7c71946a909cc44dc939aa
-    size: 1780
-  params:
-    configs/pose_net.yaml:
-      data_module:
-        batch_size: 32
-        use_test: true
-        num_workers: 4
-      max_epochs: 15
-      model:
-        name: pose_net
-        feature_extractor:
-          name: resnet34
-          pretrained: true
-        criterion:
-          name: se3
-        feature_dimension: 2048
-        drop_rate: 0.15
-        optimizer:
-          betas: 0.9 0.999
-          lr: 0.0001
-          weight_decay: 0.0005
-        bias: true
-  outs:
-  - path: models/fire_pose_net.pth.ckpt
-    md5: 914d78d2c2fcf0574fdd101694c377bb
-    size: 268930292
-train-chess:
-  cmd: python train.py --config configs/pose_net.yaml --dataset_name chess --out models/chess_pose_net.pth
-    --seed 1 --gpu 1 --log_every_n_steps 1
-  deps:
-  - path: lieposenet
-    md5: ad956b54c6d05464ca0d65c9e05268ec.dir
-    size: 122651
+    md5: ecf7ce29e4fa3764036d3ea7724d4da0.dir
+    size: 123499
     nfiles: 55
   - path: train.py
     md5: fb5134f26ef06de4bc0d4dc0de875864
@@ -134,16 +98,14 @@ train-chess:
         batch_size: 32
         use_test: true
         num_workers: 4
-      max_epochs: 15
+      max_epochs: 1
       model:
         name: pose_net
         feature_extractor:
           name: resnet34
           pretrained: true
         criterion:
-          name: dncl_poe_se3
-          head_count: 10
-          lambda_koef: 1
+          name: se3
           fix_logvar: true
         feature_dimension: 2048
         drop_rate: 0.15
@@ -153,9 +115,49 @@ train-chess:
           weight_decay: 0.0005
         bias: true
   outs:
+  - path: models/fire_pose_net.pth.ckpt
+    md5: 1831a540683bc5aac3a03a9c48967372
+    size: 268931462
+train-chess:
+  cmd: python train.py --config configs/pose_net.yaml --dataset_name chess --out models/chess_pose_net.pth
+    --seed 1 --gpu 1 --log_every_n_steps 1
+  deps:
+  - path: lieposenet
+    md5: ecf7ce29e4fa3764036d3ea7724d4da0.dir
+    size: 123499
+    nfiles: 55
+  - path: train.py
+    md5: fb5134f26ef06de4bc0d4dc0de875864
+    size: 1839
+  params:
+    configs/pose_net.yaml:
+      data_module:
+        batch_size: 32
+        use_test: true
+        num_workers: 4
+      max_epochs: 300
+      model:
+        name: pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: se3
+          fix_logvar: true
+        feature_dimension: 2048
+        drop_rate: 0.15
+        optimizer:
+          betas: 0.9 0.999
+          lr: 0.0001
+          weight_decay: 0.0005
+        scheduler:
+          step_size: 15
+          gamma: 0.5
+        bias: true
+  outs:
   - path: models/chess_pose_net.pth.ckpt
-    md5: ad85f0e84ad4a828ea715d65bb926d70
-    size: 275127041
+    md5: 66a3354408c7df2e3ad01a532e5f2af6
+    size: 268931612
 test-chess:
   cmd: python eval.py --config configs/pose_net.yaml --dataset_name chess --result
     metrics/chess_metrics.json --data_saver_path metrics/chess_trajectories.npy --model
@@ -165,12 +167,12 @@ test-chess:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: c65e2887ce1487d43a5e978faf26cc4e.dir
-    size: 122220
+    md5: ecf7ce29e4fa3764036d3ea7724d4da0.dir
+    size: 123499
     nfiles: 55
   - path: models/chess_pose_net.pth.ckpt
-    md5: 21cccbfd27bbe59f8ec4a3a0d4180ede
-    size: 275128603
+    md5: 66a3354408c7df2e3ad01a532e5f2af6
+    size: 268931612
   params:
     configs/pose_net.yaml:
       data_module:
@@ -183,9 +185,53 @@ test-chess:
           name: resnet34
           pretrained: true
         criterion:
-          name: dncl_poe_se3
-          head_count: 10
-          lambda_koef: 1.5
+          name: se3
+          fix_logvar: true
+        feature_dimension: 2048
+        drop_rate: 0.15
+        optimizer:
+          betas: 0.9 0.999
+          lr: 0.0001
+          weight_decay: 0.0005
+        scheduler:
+          step_size: 15
+          gamma: 0.5
+        bias: true
+  outs:
+  - path: metrics/chess_metrics.json
+    md5: 9c54d14f54a0cae4868f7377f1004513
+    size: 199
+  - path: metrics/chess_trajectories.npy
+    md5: 10c5b63940b365429155f1fdbc46dea3
+    size: 752777
+test-fire:
+  cmd: python eval.py --config configs/pose_net.yaml --dataset_name fire --result
+    metrics/fire_metrics.json --data_saver_path metrics/fire_trajectories.npy --model
+    models/fire_pose_net.pth.ckpt --seed 1 --gpu 1 --log_every_n_steps 1
+  deps:
+  - path: eval.py
+    md5: f4dae0d7273fb4ef256bda2228a1ae74
+    size: 2095
+  - path: lieposenet
+    md5: ecf7ce29e4fa3764036d3ea7724d4da0.dir
+    size: 123499
+    nfiles: 55
+  - path: models/fire_pose_net.pth.ckpt
+    md5: 1831a540683bc5aac3a03a9c48967372
+    size: 268931462
+  params:
+    configs/pose_net.yaml:
+      data_module:
+        batch_size: 32
+        use_test: true
+        num_workers: 4
+      model:
+        name: pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: se3
           fix_logvar: true
         feature_dimension: 2048
         drop_rate: 0.15
@@ -195,9 +241,9 @@ test-chess:
           weight_decay: 0.0005
         bias: true
   outs:
-  - path: metrics/chess_metrics.json
-    md5: cbc6c172862b8260793ec059b0b346c4
-    size: 237
-  - path: metrics/chess_trajectories.npy
-    md5: 8c2cf7156b921b69dc7f7be5b52bf342
-    size: 2768778
+  - path: metrics/fire_metrics.json
+    md5: 1f5dc603709553f2562357140b950f09
+    size: 200
+  - path: metrics/fire_trajectories.npy
+    md5: 8cedf6a02f9e8523313cad48cea2b8d1
+    size: 752777
