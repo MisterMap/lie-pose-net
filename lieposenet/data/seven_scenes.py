@@ -11,6 +11,7 @@ import numpy as np
 from torch.utils import data
 
 from .utils import load_image
+import torch
 
 
 class SevenScenes(data.Dataset):
@@ -31,6 +32,7 @@ class SevenScenes(data.Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.skip_images = skip_images
+        self.train = train
         np.random.seed(seed)
 
         # directories
@@ -108,9 +110,37 @@ class SevenScenes(data.Dataset):
                 image = [self.transform(i) for i in image]
             else:
                 image = self.transform(image)
-
+        # if self.train:
+        shift_x = np.random.rand()
+        shift_y = np.random.rand()
+        # # else:
+        # #     shift_x = 0.5
+        # #     shift_y = 0.5
+        # w0 = 128
+        # x0 = int((image.shape[1] - w0) * shift_x)
+        # y0 = int((image.shape[2] - w0) * shift_y)
+        x1 = int(np.random.rand() * image.shape[1])
+        x2 = int(np.random.rand() * image.shape[1])
+        y1 = int(np.random.rand() * image.shape[0])
+        y2 = int(np.random.rand() * image.shape[0])
+        mask = torch.zeros_like(image)
+        x1, x2 = min(x1, x2), max(x1, x2)
+        y1, y2 = min(y1, y2), max(y1, y2)
+        x1 = max(0, x1 - 64)
+        x2 = min(image.shape[1], x2 + 64)
+        y1 = max(0, y1 - 64)
+        y2 = min(image.shape[2], y2 + 64)
+        if self.train:
+            mask[:, x1:x2, y1:y2] = 1. * image.shape[2] * image.shape[1] / (x2 - x1) / (y2 - y1)
+            # torch.rand_like(image) > 0.5
+            # image = image * mask
+        # if self.train:
+        #     image = image[:, x0:x0 + w0, y0:y0+w0]
+        # else:
+        #     image = image[:, x0:x0 + w0, y0:y0 + w0]
         return {"image": image,
-                "position": pose}
-
+                "position": pose,
+                "shift_x": np.array([shift_x * 2 - 1], dtype=np.float32),
+                "shift_y": np.array([shift_y * 2 - 1], dtype=np.float32)}
     def __len__(self):
         return self.positions.shape[0]

@@ -12,9 +12,10 @@ class SE3Criterion(BasePoseCriterion):
                                               translation_base_error ** 2, rotation_base_error ** 2,
                                               rotation_base_error ** 2, rotation_base_error ** 2])
         self._logvar = None
+        self._loss = nn.SmoothL1Loss(reduction="none")
         if fix_logvar:
             x = torch.zeros(21)
-            x[:6] = -4
+            x[:6] = -3
             self._logvar = nn.Parameter(x)
 
 
@@ -48,7 +49,8 @@ class SE3Criterion(BasePoseCriterion):
         trace = torch.sum(inverse_sigma_matrix * inverse_sigma_matrix, dim=2) * self._base_covariance
         log_prob = torch.sum(delta_log ** 2 / 2., dim=1
                              ) + 0.5 * log_determinant + torch.sum(trace, dim=1)
-
+        # nll_loss = self._loss(delta_log, torch.zeros_like(delta_log)) / 2.
+        # log_prob = torch.sum(nll_loss, dim=1) + 0.5 * log_determinant
         return torch.mean(log_prob)
 
     def get_sigma_matrix(self, logvar, dim=6):
@@ -88,6 +90,7 @@ class SE3Criterion(BasePoseCriterion):
             base_logvar = torch.repeat_interleave(self._logvar[None, :6], old_logvar.shape[0], dim=0)
             stacked_logvar = torch.stack([old_logvar[:, :6], base_logvar], dim=2)
             logvar[:, :6] = torch.logsumexp(stacked_logvar, dim=2)
+            # logvar[:, :6] = base_logvar
             logvar[:, 6:] = old_logvar[:, 6:]
         return logvar
 
@@ -108,7 +111,7 @@ class SE3Criterion(BasePoseCriterion):
         for i in range(dim):
             for j in range(i + 1, dim):
                 # matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
-                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * logvar[:, k]
+                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.tanh(logvar[:, k])
                 k += 1
         return matrix
 
