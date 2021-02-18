@@ -48,24 +48,25 @@ class IPL(nn.Module):
         # return self.px_conv(px), self.py_conv(py)
         return px.repeat_interleave(self._repeats, dim=1), py.repeat_interleave(self._repeats, dim=1)
 
+
 class IPLCNNFeatureExtractor(nn.Module):
     def __init__(self):
         super().__init__()
         self._blocks = nn.ModuleList([
             Block(3, 64),
-            Block(64, 128),
-            Block(128, 256),
-            Block(256, 512),
-            Block(512, 512),
-            Block(512, 512)
+            Block(64, 64),
+            Block(64, 64),
+            Block(64, 64),
+            Block(64, 64),
+            Block(64, 64)
         ])
         self._ipl_blocks = nn.ModuleList([
-            IPL(64, 128),
-            IPL(128, 256),
-            IPL(256, 512),
-            IPL(512, 512),
-            IPL(512, 512),
-            IPL(512, 512)
+            IPL(64, 64),
+            IPL(64, 64),
+            IPL(64, 64),
+            IPL(64, 64),
+            IPL(64, 64),
+            IPL(64, 64)
         ])
         self.last_conv = nn.Conv2d(1024, 512, kernel_size=1)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
