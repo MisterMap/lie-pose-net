@@ -86,19 +86,20 @@ train-fire:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: ceee33cedeed84daf9c06760e7c301b4.dir
-    size: 102472
-    nfiles: 47
+    md5: 228a3bc8cb2c60e2c8f639019ffb586e.dir
+    size: 119819
+    nfiles: 54
   - path: train.py
-    md5: ceb05b50de7c71946a909cc44dc939aa
-    size: 1780
+    md5: fb5134f26ef06de4bc0d4dc0de875864
+    size: 1839
   params:
     configs/pose_net.yaml:
       data_module:
         batch_size: 32
         use_test: true
         num_workers: 4
-      max_epochs: 15
+        image_size: 256
+      max_epochs: 300
       model:
         name: pose_net
         feature_extractor:
@@ -106,17 +107,23 @@ train-fire:
           pretrained: true
         criterion:
           name: se3
+          rotation_koef: -3.0
+          translation_koef: -3.0
         feature_dimension: 2048
         drop_rate: 0.15
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
           weight_decay: 0.0005
+        scheduler:
+          step_size: 20
+          gamma: 0.5
         bias: true
+        activation: relu
   outs:
   - path: models/fire_pose_net.pth.ckpt
-    md5: 914d78d2c2fcf0574fdd101694c377bb
-    size: 268930292
+    md5: ffa24d6be0e3bdbd9e87a56e42f8cb88
+    size: 268932377
 train-chess:
   cmd: python train.py --config configs/pose_net.yaml --dataset_name chess --out models/chess_pose_net.pth
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -194,4 +201,53 @@ test-chess:
     size: 199
   - path: metrics/chess_trajectories.npy
     md5: 5f3ce1fd12a32ba32be868d6de19f98b
+    size: 752777
+test-fire:
+  cmd: python eval.py --config configs/pose_net.yaml --dataset_name fire --result
+    metrics/fire_metrics.json --data_saver_path metrics/fire_trajectories.npy --model
+    models/fire_pose_net.pth.ckpt --seed 1 --gpu 1 --log_every_n_steps 1
+  deps:
+  - path: eval.py
+    md5: f4dae0d7273fb4ef256bda2228a1ae74
+    size: 2095
+  - path: lieposenet
+    md5: 228a3bc8cb2c60e2c8f639019ffb586e.dir
+    size: 119819
+    nfiles: 54
+  - path: models/fire_pose_net.pth.ckpt
+    md5: ffa24d6be0e3bdbd9e87a56e42f8cb88
+    size: 268932377
+  params:
+    configs/pose_net.yaml:
+      data_module:
+        batch_size: 32
+        use_test: true
+        num_workers: 4
+        image_size: 256
+      model:
+        name: pose_net
+        feature_extractor:
+          name: resnet34
+          pretrained: true
+        criterion:
+          name: se3
+          rotation_koef: -3.0
+          translation_koef: -3.0
+        feature_dimension: 2048
+        drop_rate: 0.15
+        optimizer:
+          betas: 0.9 0.999
+          lr: 0.0001
+          weight_decay: 0.0005
+        scheduler:
+          step_size: 20
+          gamma: 0.5
+        bias: true
+        activation: relu
+  outs:
+  - path: metrics/fire_metrics.json
+    md5: 9c530e1c7c61bd183d613deb96ea2bd9
+    size: 199
+  - path: metrics/fire_trajectories.npy
+    md5: d1a719942ac6872a1a9405fbc97319f0
     size: 752777

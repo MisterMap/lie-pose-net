@@ -2,18 +2,22 @@ from liegroups.torch import SE3
 
 from .base_pose_criterion import BasePoseCriterion
 from ..utils.torch_math import *
+import torch.nn as nn
 
 
 class SE3Criterion(BasePoseCriterion):
-    def __init__(self, rotation_base_error=0, translation_base_error=0):
+    def __init__(self, rotation_koef=None, translation_koef=None, zero_covariance=False):
         super().__init__()
-        self._base_covariance = torch.tensor([translation_base_error ** 2, translation_base_error ** 2,
-                                              translation_base_error ** 2, rotation_base_error ** 2,
-                                              rotation_base_error ** 2, rotation_base_error ** 2])
+        self._logvar = None
+        self._zero_covariance = zero_covariance
+        if rotation_koef is not None and translation_koef is not None:
+            x = torch.zeros(6)
+            x[:3] = translation_koef
+            x[3:6] = rotation_koef
+            self._logvar = nn.Parameter(x)
 
     @property
     def position_dimension(self):
-        # return 6 + 21
         return 7 + 6 + 15
 
     @staticmethod
@@ -37,11 +41,7 @@ class SE3Criterion(BasePoseCriterion):
         delta_log = torch.bmm(inverse_sigma_matrix, delta_log[:, :, None])[:, :, 0]
         log_determinant = self.get_logvar_determinant(logvar)
 
-        self._base_covariance = self._base_covariance.to(value_matrix.device)
-        trace = torch.sum(inverse_sigma_matrix * inverse_sigma_matrix, dim=2) * self._base_covariance
-        log_prob = torch.sum(delta_log ** 2 / 2., dim=1
-                             ) + 0.5 * log_determinant + 6 * math.log(math.sqrt(2 * math.pi)) + torch.sum(trace, dim=1)
-
+        log_prob = torch.sum(delta_log ** 2 / 2., dim=1) + 0.5 * log_determinant
         return torch.mean(log_prob)
 
     @staticmethod
@@ -72,12 +72,29 @@ class SE3Criterion(BasePoseCriterion):
                 result[:, i, j] = matrix[i][j]
         return result
 
-    @staticmethod
-    def get_logvar_determinant(logvar):
-        return torch.sum(logvar[:, :6], dim=1)
+    def get_logvar_determinant(self, logvar):
+        return self._get_logvar_determinant(self.calculate_logvar(logvar))
+
+    def calculate_logvar(self, logvar):
+        if self._logvar is not None:
+            old_logvar = logvar
+            logvar = torch.zeros_like(logvar)
+            base_logvar = torch.repeat_interleave(self._logvar[None, :6], old_logvar.shape[0], dim=0)
+            stacked_logvar = torch.stack([old_logvar[:, :6], base_logvar], dim=2)
+            logvar[:, :6] = torch.logsumexp(stacked_logvar, dim=2)
+        if self._zero_covariance:
+            logvar[:, 6:] = 0
+        return logvar
 
     @staticmethod
-    def get_inverse_sigma_matrix(logvar, dim=6):
+    def _get_logvar_determinant(logvar):
+        return torch.sum(logvar[:, :6], dim=1)
+
+    def get_inverse_sigma_matrix(self, logvar, dim=6):
+        return self._get_inverse_sigma_matrix(self.calculate_logvar(logvar),  dim=dim)
+
+    @staticmethod
+    def _get_inverse_sigma_matrix(logvar, dim=6):
         matrix = torch.zeros(logvar.shape[0], dim, dim, device=logvar.device)
         k = 0
         for i in range(dim):
@@ -85,7 +102,7 @@ class SE3Criterion(BasePoseCriterion):
             k += 1
         for i in range(dim):
             for j in range(i + 1, dim):
-                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * torch.sinh(logvar[:, k])
+                matrix[:, i, j] = torch.exp(-0.5 * logvar[:, i]) * logvar[:, k]
                 k += 1
         return matrix
 
@@ -93,7 +110,6 @@ class SE3Criterion(BasePoseCriterion):
         return predicted_position[:, :3]
 
     def rotation(self, predicted_position):
-        # return quaternion_from_logq(predicted_position[:, 3:6])
         return torch.nn.functional.normalize(predicted_position[:, 3:7])
 
     def saved_data(self, predicted_position):

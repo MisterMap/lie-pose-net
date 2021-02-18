@@ -6,17 +6,26 @@ from .seven_scenes import SevenScenes
 
 
 class SevenScenesDataModule(pl.LightningDataModule):
-    def __init__(self, scene, data_path, batch_size=128, num_workers=4, split=(0.9, 0.1), seed=0, use_test=False):
+    def __init__(self, scene, data_path, batch_size=128, num_workers=4, split=(0.9, 0.1), seed=0, use_test=False,
+                 image_size=256):
         super().__init__()
         torch.random.manual_seed(seed)
         image_transform = transforms.Compose([
-            transforms.Resize(256),
+            transforms.Resize(image_size),
+            # transforms.CenterCrop(128),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize(image_size),
+            # transforms.CenterCrop(256),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
         ])
         self._train_dataset = SevenScenes(scene, data_path, True, image_transform, mode=0, seed=seed)
-        self._test_dataset = SevenScenes(scene, data_path, False, image_transform, mode=0, seed=seed)
+        self._test_dataset = SevenScenes(scene, data_path, False, test_transform, mode=0, seed=seed)
         self._batch_size = batch_size
         self._num_workers = num_workers
         train_length = len(self._train_dataset)
