@@ -1,7 +1,7 @@
 model:
     name: pose_net
     feature_extractor:
-        name: resnet34
+        name: ipl_cnn
         pretrained: True
     criterion:
         name: se3
@@ -21,8 +21,8 @@ model:
 
 data_module:
     batch_size: 32
-    use_test: True
+    use_test: False
     num_workers: 4
-    image_size: 256
+    image_size: 128
 
 max_epochs: 300

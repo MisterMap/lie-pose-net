@@ -4,6 +4,9 @@ from ..criterions.se3_criterion import SE3Criterion
 from ..criterions.poe_se3_criterion import POESE3Criterion
 from ..criterions.parametrized_poe_se3_criterion import ParametrizedPOESE3Criterion
 from torchvision import models
+from ..models.cnn_feature_extractor import CNNFeatureExtractor
+from ..models.ipl_cnn_feature_extractor import IPLCNNFeatureExtractor
+import torch
 
 
 def remove_name_key(parameters):
@@ -28,6 +31,10 @@ class ModelFactory(object):
     def make_feature_extractor(parameters):
         if parameters.name == "resnet34":
             return models.resnet34(pretrained=parameters.pretrained)
+        if parameters.name == "cnn":
+            return CNNFeatureExtractor()
+        if parameters.name == "ipl_cnn":
+            return IPLCNNFeatureExtractor()
         else:
             raise ValueError("Unknown feature_extractor name: {}".format(parameters.name))
 

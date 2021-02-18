@@ -86,9 +86,9 @@ train-fire:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 228a3bc8cb2c60e2c8f639019ffb586e.dir
-    size: 119819
-    nfiles: 54
+    md5: 9facdff8ea6ea7bd531ce57b3f842908.dir
+    size: 129984
+    nfiles: 58
   - path: train.py
     md5: fb5134f26ef06de4bc0d4dc0de875864
     size: 1839
@@ -96,14 +96,14 @@ train-fire:
     configs/pose_net.yaml:
       data_module:
         batch_size: 32
-        use_test: true
+        use_test: false
         num_workers: 4
-        image_size: 256
+        image_size: 128
       max_epochs: 300
       model:
         name: pose_net
         feature_extractor:
-          name: resnet34
+          name: ipl_cnn
           pretrained: true
         criterion:
           name: se3
@@ -122,8 +122,8 @@ train-fire:
         activation: relu
   outs:
   - path: models/fire_pose_net.pth.ckpt
-    md5: ffa24d6be0e3bdbd9e87a56e42f8cb88
-    size: 268932377
+    md5: c270e4ed9df7dfc768bb22d3ee229fd4
+    size: 96010686
 train-chess:
   cmd: python train.py --config configs/pose_net.yaml --dataset_name chess --out models/chess_pose_net.pth
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -211,23 +211,23 @@ test-fire:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: 228a3bc8cb2c60e2c8f639019ffb586e.dir
-    size: 119819
-    nfiles: 54
+    md5: 9facdff8ea6ea7bd531ce57b3f842908.dir
+    size: 129984
+    nfiles: 58
   - path: models/fire_pose_net.pth.ckpt
-    md5: ffa24d6be0e3bdbd9e87a56e42f8cb88
-    size: 268932377
+    md5: c270e4ed9df7dfc768bb22d3ee229fd4
+    size: 96010686
   params:
     configs/pose_net.yaml:
       data_module:
         batch_size: 32
-        use_test: true
+        use_test: false
         num_workers: 4
-        image_size: 256
+        image_size: 128
       model:
         name: pose_net
         feature_extractor:
-          name: resnet34
+          name: ipl_cnn
           pretrained: true
         criterion:
           name: se3
@@ -246,8 +246,8 @@ test-fire:
         activation: relu
   outs:
   - path: metrics/fire_metrics.json
-    md5: 9c530e1c7c61bd183d613deb96ea2bd9
-    size: 199
+    md5: 43f60b635b6087052ccd606f1b650bc5
+    size: 201
   - path: metrics/fire_trajectories.npy
-    md5: d1a719942ac6872a1a9405fbc97319f0
+    md5: 98893b4e7f12c79ef2bf872ff029c9ad
     size: 752777
