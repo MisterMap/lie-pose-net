@@ -42,3 +42,12 @@ def calculate_metrics(data_saver):
         "median_rotation_error": float(np.median(rotation_errors))
     }
     return results
+
+
+def show_points(image, px, py):
+    figure = plt.figure(dpi=200)
+    plt.imshow(np.clip((image.cpu().detach().permute(1, 2, 0).numpy() + 1) / 2, 0, 1))
+    px = ((px.cpu().detach().numpy() + 1) / 2) * image.shape[1]
+    py = ((py.cpu().detach().numpy() + 1) / 2) * image.shape[2]
+    plt.scatter(py, px, c="red")
+    return figure

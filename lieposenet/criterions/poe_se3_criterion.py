@@ -5,8 +5,8 @@ from ..utils.torch_math import *
 
 
 class POESE3Criterion(SE3Criterion):
-    def __init__(self, head_count=10):
-        super().__init__()
+    def __init__(self, head_count=10, **kwargs):
+        super().__init__(**kwargs)
         self._head_count = head_count
 
     @property

@@ -7,9 +7,8 @@ import torch
 
 
 class ParametrizedPOESE3Criterion(POESE3Criterion):
-    def __init__(self, head_count=10):
-        super().__init__()
-        self._head_count = head_count
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._global_positions = torch.nn.Parameter(torch.randn(self._head_count, 7), requires_grad=True)
 
     def mean_matrix(self, predicted_position):
@@ -18,3 +17,6 @@ class ParametrizedPOESE3Criterion(POESE3Criterion):
         batch_size = local_matrix.shape[0] // self._head_count
         global_matrix = torch.repeat_interleave(global_matrix, batch_size, dim=0)
         return torch.bmm(global_matrix, inverse_pose_matrix(local_matrix))
+
+    def saved_data(self, predicted_position):
+        return {}

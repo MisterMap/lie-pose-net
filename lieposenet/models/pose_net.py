@@ -61,6 +61,17 @@ class PoseNet(BaseLightningModule):
             result[key] = torch.tensor(value)
         return result
 
+    def validation_step(self, batch, batch_index):
+        super().validation_step(batch, batch_index)
+        # if batch_index == 0:
+        #     for i in range(3):
+        #         if self.feature_extractor.px is not None:
+        #             px = self.feature_extractor.px[i]
+        #             py = self.feature_extractor.py[i]
+        #             image = batch["image"][i]
+        #             figure = show_points(image, px, py)
+        #             self.logger.log_figure("show_points_{}".format(i), figure, self.global_step)
+
     def on_test_epoch_end(self):
         self.show_images()
         self._data_saver.save()

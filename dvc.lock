@@ -86,8 +86,8 @@ train-fire:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 9facdff8ea6ea7bd531ce57b3f842908.dir
-    size: 129984
+    md5: deca35ae44138b7b254301f1645485ff.dir
+    size: 132572
     nfiles: 58
   - path: train.py
     md5: fb5134f26ef06de4bc0d4dc0de875864
@@ -96,9 +96,9 @@ train-fire:
     configs/pose_net.yaml:
       data_module:
         batch_size: 32
-        use_test: false
+        use_test: true
         num_workers: 4
-        image_size: 128
+        image_size: 256
       max_epochs: 300
       model:
         name: pose_net
@@ -113,7 +113,7 @@ train-fire:
         drop_rate: 0.15
         optimizer:
           betas: 0.9 0.999
-          lr: 0.0001
+          lr: 0.01
           weight_decay: 0.0005
         scheduler:
           step_size: 20
@@ -122,8 +122,8 @@ train-fire:
         activation: relu
   outs:
   - path: models/fire_pose_net.pth.ckpt
-    md5: c270e4ed9df7dfc768bb22d3ee229fd4
-    size: 96010686
+    md5: a63d7d76d4316c506295ccf726042b34
+    size: 607661
 train-chess:
   cmd: python train.py --config configs/pose_net.yaml --dataset_name chess --out models/chess_pose_net.pth
     --seed 1 --gpu 1 --log_every_n_steps 1
@@ -211,19 +211,19 @@ test-fire:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: 9facdff8ea6ea7bd531ce57b3f842908.dir
-    size: 129984
+    md5: deca35ae44138b7b254301f1645485ff.dir
+    size: 132572
     nfiles: 58
   - path: models/fire_pose_net.pth.ckpt
-    md5: c270e4ed9df7dfc768bb22d3ee229fd4
-    size: 96010686
+    md5: a63d7d76d4316c506295ccf726042b34
+    size: 607661
   params:
     configs/pose_net.yaml:
       data_module:
         batch_size: 32
-        use_test: false
+        use_test: true
         num_workers: 4
-        image_size: 128
+        image_size: 256
       model:
         name: pose_net
         feature_extractor:
@@ -237,7 +237,7 @@ test-fire:
         drop_rate: 0.15
         optimizer:
           betas: 0.9 0.999
-          lr: 0.0001
+          lr: 0.01
           weight_decay: 0.0005
         scheduler:
           step_size: 20
@@ -246,8 +246,8 @@ test-fire:
         activation: relu
   outs:
   - path: metrics/fire_metrics.json
-    md5: 43f60b635b6087052ccd606f1b650bc5
-    size: 201
+    md5: 7d4790e879643218555efe97ac81d13a
+    size: 199
   - path: metrics/fire_trajectories.npy
-    md5: 98893b4e7f12c79ef2bf872ff029c9ad
+    md5: 26dcaa30d41f3aa19d0c88506bf36ab9
     size: 752777

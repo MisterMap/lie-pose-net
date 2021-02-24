@@ -18,6 +18,7 @@ logs
 lightning_logs*
 tmp
 mlruns
+*.tmp
 
 # Audio and video
 *.avi

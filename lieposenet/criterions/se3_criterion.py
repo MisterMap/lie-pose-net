@@ -81,7 +81,8 @@ class SE3Criterion(BasePoseCriterion):
             logvar = torch.zeros_like(logvar)
             base_logvar = torch.repeat_interleave(self._logvar[None, :6], old_logvar.shape[0], dim=0)
             stacked_logvar = torch.stack([old_logvar[:, :6], base_logvar], dim=2)
-            logvar[:, :6] = torch.logsumexp(stacked_logvar, dim=2)
+            # logvar[:, :6] = torch.logsumexp(stacked_logvar, dim=2)
+            logvar[:, :6] = base_logvar
         if self._zero_covariance:
             logvar[:, 6:] = 0
         return logvar
@@ -114,7 +115,7 @@ class SE3Criterion(BasePoseCriterion):
 
     def saved_data(self, predicted_position):
         logvar = predicted_position[:, 7:]
-        mean_matrix = self.mean_matrix(predicted_position[:, :7])
+        mean_matrix = self.mean_matrix(predicted_position)
         inverse_sigma_matrix = self.get_inverse_sigma_matrix(logvar)
         return {"mean_matrix": mean_matrix,
                 "inverse_sigma_matrix": inverse_sigma_matrix}
