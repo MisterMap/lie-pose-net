@@ -50,6 +50,8 @@ class SevenScenes(data.Dataset):
         self.positions = []
         for sequence in sequences:
             sequence_directory = osp.join(base_directory, 'seq-{:02d}'.format(sequence))
+            if not osp.isdir(sequence_directory):
+                self.unzip_sequence(base_directory, sequence)
             pose_filenames = [x for x in os.listdir(osp.join(sequence_directory, '.')) if x.find('pose') >= 0]
 
             frame_indexes = np.arange(len(pose_filenames), dtype=np.int)
@@ -63,6 +65,14 @@ class SevenScenes(data.Dataset):
             self.depth_images.extend(depth_images)
             self.positions.extend(positions)
         self.positions = np.array(self.positions)
+
+    @staticmethod
+    def unzip_sequence(base_directory, sequence):
+        import zipfile
+        sequence_directory = osp.join(base_directory, 'seq-{:02d}'.format(sequence))
+        zip_file = osp.join(base_directory, 'seq-{:02d}.zip'.format(sequence))
+        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            zip_ref.extractall(sequence_directory)
 
     def __getitem__(self, index):
         pose = None
