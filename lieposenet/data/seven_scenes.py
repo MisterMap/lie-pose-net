@@ -69,10 +69,9 @@ class SevenScenes(data.Dataset):
     @staticmethod
     def unzip_sequence(base_directory, sequence):
         import zipfile
-        sequence_directory = osp.join(base_directory, 'seq-{:02d}'.format(sequence))
         zip_file = osp.join(base_directory, 'seq-{:02d}.zip'.format(sequence))
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(sequence_directory)
+            zip_ref.extractall(base_directory)
 
     def __getitem__(self, index):
         pose = None
