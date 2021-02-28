@@ -15,7 +15,7 @@ from .utils import load_image
 
 class SevenScenes(data.Dataset):
     def __init__(self, scene, data_path, train, transform=None,
-                 target_transform=None, mode=0, seed=7, skip_images=False,):
+                 target_transform=None, mode=0, seed=7, skip_images=False, base_sequence_path=None):
         """
         :param scene: scene name ['chess', 'pumpkin', ...]
         :param data_path: root 7scenes data directory.
@@ -48,13 +48,15 @@ class SevenScenes(data.Dataset):
         self.color_images = []
         self.depth_images = []
         self.positions = []
+        if base_sequence_path is None:
+            base_sequence_path = base_directory
         for sequence in sequences:
-            sequence_directory = osp.join(base_directory, 'seq-{:02d}'.format(sequence))
+            sequence_directory = osp.join(base_sequence_path, 'seq-{:02d}'.format(sequence))
             if not osp.isdir(sequence_directory):
                 print("[SevenScenes] - don't find sequence directory for sequence {} in directory {}".format(sequence,
-                      base_directory))
+                      base_sequence_path))
                 print("[SevenScenes] - trying to unzip")
-                self.unzip_sequence(base_directory, sequence)
+                self.unzip_sequence(base_directory, base_sequence_path, sequence)
             pose_filenames = [x for x in os.listdir(osp.join(sequence_directory, '.')) if x.find('pose') >= 0]
 
             frame_indexes = np.arange(len(pose_filenames), dtype=np.int)
@@ -70,13 +72,13 @@ class SevenScenes(data.Dataset):
         self.positions = np.array(self.positions)
 
     @staticmethod
-    def unzip_sequence(base_directory, sequence):
+    def unzip_sequence(base_directory, base_sequence_path, sequence):
         import zipfile
         zip_file = osp.join(base_directory, 'seq-{:02d}.zip'.format(sequence))
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
             print("[SevenScenes] - unziping file {}".format(zip_file))
             try:
-                zip_ref.extractall(base_directory)
+                zip_ref.extractall(base_sequence_path)
             except zipfile.BadZipFile:
                 print("[WARN][SevenScenes] - bad zip file, but I will continue")
 
