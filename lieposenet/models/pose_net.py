@@ -61,6 +61,8 @@ class PoseNet(BaseLightningModule):
         return result
 
     def on_test_epoch_end(self):
+        metrics = self.additional_metrics()
+        self.log_dict(metrics)
         self.show_images()
         self._data_saver.save()
 

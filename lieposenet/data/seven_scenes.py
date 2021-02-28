@@ -51,6 +51,9 @@ class SevenScenes(data.Dataset):
         for sequence in sequences:
             sequence_directory = osp.join(base_directory, 'seq-{:02d}'.format(sequence))
             if not osp.isdir(sequence_directory):
+                print("[SevenScenes] - don't find sequence directory for sequence {} in directory {}".format(sequence,
+                      base_directory))
+                print("[SevenScenes] - trying to unzip")
                 self.unzip_sequence(base_directory, sequence)
             pose_filenames = [x for x in os.listdir(osp.join(sequence_directory, '.')) if x.find('pose') >= 0]
 
@@ -71,7 +74,11 @@ class SevenScenes(data.Dataset):
         import zipfile
         zip_file = osp.join(base_directory, 'seq-{:02d}.zip'.format(sequence))
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(base_directory)
+            print("[SevenScenes] - unziping file {}".format(zip_file))
+            try:
+                zip_ref.extractall(base_directory)
+            except zipfile.BadZipFile:
+                print("[WARN][SevenScenes] - bad zip file, but I will continue")
 
     def __getitem__(self, index):
         pose = None
