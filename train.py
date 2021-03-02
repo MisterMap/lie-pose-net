@@ -1,10 +1,11 @@
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
+import os
 
 from lieposenet import ModelFactory
 from lieposenet.data import SevenScenesDataModule
-from lieposenet.utils import TensorBoardLogger, load_hparams_from_yaml
+from lieposenet.utils import TensorBoardLogger, load_hparams_from_yaml, MLFlowLogger, LoggerCollection
 
 parser = ArgumentParser(description="Run Pose MVAE model")
 parser.add_argument("--config", type=str, default="./configs/model.yaml")
@@ -18,7 +19,16 @@ parser.add_argument("--out", type=str, default="model.pth")
 parser = pl.Trainer.add_argparse_args(parser)
 arguments = parser.parse_args()
 
-logger = TensorBoardLogger("lightning_logs")
+loggers = [TensorBoardLogger("lightning_logs", name=arguments.dataset_name)]
+if "MLFLOW_URL" in os.environ.keys():
+    print("[train] - Use MLflow logger")
+    print("[train] - MLFLOW_URL = {}".format(os.environ["MLFLOW_URL"]))
+    print("[train] - MLFLOW_S3_ENDPOINT_URL = {}".format(os.environ["MLFLOW_S3_ENDPOINT_URL"]))
+    print("[train] - AWS_ACCESS_KEY_ID = {}".format(os.environ["AWS_ACCESS_KEY_ID"]))
+    print("[train] - AWS_SECRET_ACCESS_KEY = {}".format(os.environ["AWS_SECRET_ACCESS_KEY"]))
+    loggers.append(MLFlowLogger(experiment_name=arguments.dataset_name,
+                                tracking_uri=os.environ["MLFLOW_URL"]))
+logger = LoggerCollection(loggers)
 
 # Seed
 deterministic = False
@@ -42,6 +52,7 @@ data_module = SevenScenesDataModule(arguments.dataset_name, arguments.dataset_fo
 
 # Load parameters
 model_params = params.model
+model_params.data_module = data_module_params
 print("Load model from params \n" + str(model_params))
 
 # Make model

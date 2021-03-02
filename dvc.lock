@@ -129,19 +129,20 @@ train-chess:
     --seed 1 --gpu 1 --log_every_n_steps 1
   deps:
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: 942b320d66b46fa954540ecf1510e5ca.dir
+    size: 134141
+    nfiles: 63
   - path: train.py
-    md5: fb5134f26ef06de4bc0d4dc0de875864
-    size: 1839
+    md5: bdff4162076735ab4a293268f8f72166
+    size: 2565
   params:
     configs/pose_net.yaml:
       data_module:
         batch_size: 32
         use_test: true
         num_workers: 4
-      max_epochs: 15
+        image_size: 256
+      max_epochs: 300
       model:
         name: pose_net
         feature_extractor:
@@ -149,17 +150,23 @@ train-chess:
           pretrained: true
         criterion:
           name: se3
+          rotation_koef: -3.0
+          translation_koef: -3.0
         feature_dimension: 2048
         drop_rate: 0.15
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
           weight_decay: 0.0005
+        scheduler:
+          step_size: 20
+          gamma: 0.5
         bias: true
+        activation: relu
   outs:
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: 0f9b5c5c56d88986a6070c3e0939a7f3
+    size: 268932282
 test-chess:
   cmd: python eval.py --config configs/pose_net.yaml --dataset_name chess --result
     metrics/chess_metrics.json --data_saver_path metrics/chess_trajectories.npy --model
@@ -169,18 +176,19 @@ test-chess:
     md5: f4dae0d7273fb4ef256bda2228a1ae74
     size: 2095
   - path: lieposenet
-    md5: 5659fb263ee57d5ba8ce4dae29af91b3.dir
-    size: 103849
-    nfiles: 47
+    md5: 942b320d66b46fa954540ecf1510e5ca.dir
+    size: 134141
+    nfiles: 63
   - path: models/chess_pose_net.pth.ckpt
-    md5: ab5330585ba5be0640d0fc04635c4deb
-    size: 268931019
+    md5: 0f9b5c5c56d88986a6070c3e0939a7f3
+    size: 268932282
   params:
     configs/pose_net.yaml:
       data_module:
         batch_size: 32
         use_test: true
         num_workers: 4
+        image_size: 256
       model:
         name: pose_net
         feature_extractor:
@@ -188,19 +196,25 @@ test-chess:
           pretrained: true
         criterion:
           name: se3
+          rotation_koef: -3.0
+          translation_koef: -3.0
         feature_dimension: 2048
         drop_rate: 0.15
         optimizer:
           betas: 0.9 0.999
           lr: 0.0001
           weight_decay: 0.0005
+        scheduler:
+          step_size: 20
+          gamma: 0.5
         bias: true
+        activation: relu
   outs:
   - path: metrics/chess_metrics.json
-    md5: 887047ab9c9c3775abc41c38182ec4ac
-    size: 199
+    md5: b42039cf64e87b0cb6f2cf33a3022a5e
+    size: 196
   - path: metrics/chess_trajectories.npy
-    md5: 5f3ce1fd12a32ba32be868d6de19f98b
+    md5: de5e70d13237bcfb775ac1f1e50dab10
     size: 752777
 test-fire:
   cmd: python eval.py --config configs/pose_net.yaml --dataset_name fire --result
