@@ -36,7 +36,6 @@ class PoseNet(BaseLightningModule):
                 nn.init.kaiming_normal_(m.weight.data)
                 if m.bias is not None:
                     nn.init.constant_(m.bias.data, 0)
-
         self._data_saver = DataSaver(data_saver_path)
 
     def save_test_data(self, batch, output, losses):

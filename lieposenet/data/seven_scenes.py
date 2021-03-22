@@ -15,7 +15,8 @@ from .utils import load_image
 
 class SevenScenes(data.Dataset):
     def __init__(self, scene, data_path, train, transform=None,
-                 target_transform=None, mode=0, seed=7, skip_images=False, base_sequence_path=None):
+                 target_transform=None, mode=0, seed=7, skip_images=False, base_sequence_path=None,
+                 sequences=None):
         """
         :param scene: scene name ['chess', 'pumpkin', ...]
         :param data_path: root 7scenes data directory.
@@ -42,7 +43,8 @@ class SevenScenes(data.Dataset):
         else:
             split_file = osp.join(base_directory, 'TestSplit.txt')
         with open(split_file, 'r') as fd:
-            sequences = [int(x.split('sequence')[-1]) for x in fd if not x.startswith('#')]
+            if sequences is None:
+                sequences = [int(x.split('sequence')[-1]) for x in fd if not x.startswith('#')]
 
         # read positions and collect image names
         self.color_images = []
