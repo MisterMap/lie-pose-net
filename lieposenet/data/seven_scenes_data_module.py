@@ -40,13 +40,13 @@ class SevenScenesDataModule(pl.LightningDataModule):
         print(f"[ToyDataModule] - validation dataset size {len(self._validation_subset)}")
 
     def train_dataloader(self, *args, **kwargs):
-        return torch.utils.data.DataLoader(self._train_subset, self._batch_size, True, pin_memory=True,
+        return torch.utils.data.DataLoader(self._train_subset, self._batch_size, True, pin_memory=False,
                                            num_workers=self._num_workers)
 
     def val_dataloader(self, *args, **kwargs):
-        return torch.utils.data.DataLoader(self._validation_subset, self._batch_size, False, pin_memory=True,
+        return torch.utils.data.DataLoader(self._validation_subset, self._batch_size, False, pin_memory=False,
                                            num_workers=self._num_workers)
 
     def test_dataloader(self, *args, **kwargs):
-        return torch.utils.data.DataLoader(self._test_dataset, self._batch_size, False, pin_memory=True,
+        return torch.utils.data.DataLoader(self._test_dataset, self._batch_size, False, pin_memory=False,
                                            num_workers=self._num_workers)

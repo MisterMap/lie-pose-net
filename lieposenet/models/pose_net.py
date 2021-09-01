@@ -1,8 +1,3 @@
-"""
-Copyright (C) 2018 NVIDIA Corporation.  All rights reserved.
-Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
-implementation of PoseNet and MapNet networks 
-"""
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -10,15 +5,16 @@ from .base_lightning_module import BaseLightningModule
 from ..utils.pose_net_result_evaluator import *
 from ..utils.torch_math import *
 from ..utils.data_saver import DataSaver
+from torchvision import models
 
 
 class PoseNet(BaseLightningModule):
-    def __init__(self, parameters, feature_extractor, criterion, data_saver_path="trajectories.npy"):
+    def __init__(self, parameters, criterion, data_saver_path="trajectories.npy"):
         super(PoseNet, self).__init__(parameters)
 
         self.criterion = criterion
         # replace the last FC layer in feature extractor
-        self.feature_extractor = feature_extractor
+        self.feature_extractor = models.resnet34(pretrained=parameters.feature_extractor.pretrained)
         self.feature_extractor.avgpool = nn.AdaptiveAvgPool2d(1)
         feature_extractor_output_dimension = self.feature_extractor.fc.in_features
         self.feature_extractor.fc = nn.Linear(feature_extractor_output_dimension, parameters.feature_dimension)
@@ -50,7 +46,7 @@ class PoseNet(BaseLightningModule):
     def show_images(self):
         figure = show_3d_trajectories([self._data_saver["truth_position"],
                                        self._data_saver["predicted_position"]])
-        self.logger.log_figure("3d_trajectories", figure, self.global_step)
+        # self.logger.log_figure("3d_trajectories", figure, self.global_step)
 
     def additional_metrics(self):
         metrics = calculate_metrics(self._data_saver)

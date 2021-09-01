@@ -61,7 +61,7 @@ class SevenScenes(data.Dataset):
                 self.unzip_sequence(base_directory, base_sequence_path, sequence)
             pose_filenames = [x for x in os.listdir(osp.join(sequence_directory, '.')) if x.find('pose') >= 0]
 
-            frame_indexes = np.arange(len(pose_filenames), dtype=np.int)
+            frame_indexes = np.arange(len(pose_filenames), dtype=np.int64)
             positions = [np.loadtxt(osp.join(sequence_directory, 'frame-{:06d}.pose.txt'.
                                              format(i))) for i in frame_indexes]
             color_images = [osp.join(sequence_directory, 'frame-{:06d}.color.png'.format(i))
