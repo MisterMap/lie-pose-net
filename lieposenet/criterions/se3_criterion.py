@@ -82,6 +82,7 @@ class SE3Criterion(BasePoseCriterion):
             base_logvar = torch.repeat_interleave(self._logvar[None, :6], old_logvar.shape[0], dim=0)
             stacked_logvar = torch.stack([old_logvar[:, :6], base_logvar], dim=2)
             logvar[:, :6] = torch.logsumexp(stacked_logvar, dim=2)
+            logvar[:, 6:] = old_logvar[:, 6:]
         if self._zero_covariance:
             logvar[:, 6:] = 0
         return logvar

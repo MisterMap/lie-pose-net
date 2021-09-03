@@ -4,20 +4,14 @@ matplotlib
 tqdm
 pillow
 torchvision
-torch
+torch >= 1.7.0
 wget
 ipython
-pandas
-mlflow
+ipykernel
 kornia
 albumentations
 tensorboard
-boto3
-setuptools
-wheel
-grpcio
 pytorch-lightning
-dvc
-dvc[gdrive]
 pyyaml>=5.4.1
--e git://github.com/MisterMap/liegroups.git#egg=liegroups
+-e git+https://github.com/MisterMap/liegroups.git#egg=liegroups
+clearml
