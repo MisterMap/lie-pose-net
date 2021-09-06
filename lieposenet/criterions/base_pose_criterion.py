@@ -22,5 +22,8 @@ class BasePoseCriterion(nn.Module):
         translation = self.translation(predicted_position_parametrization)
         return SE3Position.from_q_position(torch.cat([translation, rotation], dim=1))
 
+    def metrics(self):
+        return {}
+
     def saved_data(self, predicted_position):
         return {}

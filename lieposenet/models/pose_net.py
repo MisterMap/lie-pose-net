@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torchmetrics.functional import mean_squared_error
 
 from .base_lightning_module import BaseLightningModule
-from ..utils.pose_net_result_evaluator import *
+from ..utils.pose_net_result_evaluator import calculate_metrics, show_3d_trajectories
 from ..utils.torch_math import *
 from ..utils.data_saver import DataSaver
 from torchvision import models
@@ -107,4 +107,5 @@ class PoseNet(BaseLightningModule):
             "mse_log_se3_rotation": log_se3_rotation_error,
             "mse_log_se3_translation": log_se3_translation_error
         }
+        metrics.update(self.criterion.metrics())
         return metrics

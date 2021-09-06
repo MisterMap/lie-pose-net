@@ -39,3 +39,9 @@ class PoseNetCriterion(BasePoseCriterion):
 
     def rotation(self, predicted_position):
         return quaternion_from_logq(predicted_position[:, 3:6])
+
+    def metrics(self):
+        return {
+            "rotation_koef": self.rotation_koef,
+            "translation_koef": self.translation_koef
+        }
