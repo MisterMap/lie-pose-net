@@ -49,7 +49,7 @@ class SE3Position(object):
         if self._q_position is not None:
             return self._q_position[:, 3:7]
         q_position = quaternion_from_matrix(self._matrix_position)
-        return q_position[:, 3:7]
+        return q_position
 
     @property
     def matrix(self):
