@@ -16,7 +16,7 @@ class TestPoseNet(unittest.TestCase):
     def setUp(self) -> None:
         torch.autograd.set_detect_anomaly(True)
         current_folder = os.path.dirname(os.path.abspath(__file__))
-        dataset_folder = os.path.join(os.path.dirname(current_folder), "data", "7scenes")
+        dataset_folder = "/media/mikhail/Data3T/7scenes"
         self._data_module = DataModuleMock(SevenScenesDataModule("chess", dataset_folder, 2, 4))
         self._params = AttributeDict(
             name="pose_net",
@@ -30,6 +30,8 @@ class TestPoseNet(unittest.TestCase):
             ),
             feature_dimension=2048,
             drop_rate=0.5,
+            bias=True,
+            activation="relu"
         )
         self._trainer = pl.Trainer(logger=TensorBoardLogger("lightning_logs"), max_epochs=1, gpus=1)
 

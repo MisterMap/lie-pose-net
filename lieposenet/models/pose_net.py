@@ -1,11 +1,14 @@
 import torch.nn as nn
 import torch.nn.functional as F
+from torchmetrics.functional import mean_squared_error
 
 from .base_lightning_module import BaseLightningModule
 from ..utils.pose_net_result_evaluator import *
 from ..utils.torch_math import *
 from ..utils.data_saver import DataSaver
 from torchvision import models
+from ..utils.se3_position import SE3Position
+from ..utils.torch_se3_math import calculate_log_se3_delta
 
 
 class PoseNet(BaseLightningModule):
@@ -81,12 +84,27 @@ class PoseNet(BaseLightningModule):
         return predicted_position, {"loss": loss}
 
     def metrics(self, batch, output):
-        truth_position = batch["position"][:, :3, 3]
-        truth_rotation = quaternion_from_matrix(batch["position"])
-        predicted_position = self.criterion.translation(output)
-        predicted_rotation = self.criterion.rotation(output)
+        target_position = SE3Position.from_matrix_position(batch["position"])
+        predicted_position = self.criterion.se3_position(output)
+        mean_translation_error = torch.mean(
+            torch.norm(predicted_position.translation - target_position.translation, dim=1, p=2))
+        mean_rotation_error = torch.mean(
+            quaternion_angular_error(predicted_position.q_rotation, target_position.q_rotation)
+        )
+        translation_error = mean_squared_error(predicted_position.translation, target_position.translation)
+        rotation_error = mean_squared_error(predicted_position.log_q_rotation, target_position.log_q_rotation)
+        log_se3_delta = calculate_log_se3_delta(predicted_position, target_position)
+        log_se3_translation_error = torch.mean(log_se3_delta[:, :3] ** 2)
+        log_se3_rotation_error = torch.mean(log_se3_delta[:, 3:] ** 2)
+        log_se3_error = torch.mean(log_se3_delta ** 2)
+
         metrics = {
-            "position_error": torch.mean(torch.sqrt(torch.sum((truth_position - predicted_position) ** 2, dim=1))),
-            "rotation_error": torch.mean(quaternion_angular_error(truth_rotation, predicted_rotation))
+            "mean_translation": mean_translation_error,
+            "mean_rotation": mean_rotation_error,
+            "mse_translation": translation_error,
+            "mse_rotation": rotation_error,
+            "mse_log_se3": log_se3_error,
+            "mse_log_se3_rotation": log_se3_rotation_error,
+            "mse_log_se3_translation": log_se3_translation_error
         }
         return metrics

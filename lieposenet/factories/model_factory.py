@@ -20,7 +20,7 @@ class ModelFactory(object):
         criterion = self.make_criterion(parameters.criterion)
 
         if parameters.name == "pose_net":
-            return PoseNet(parameters, feature_extractor, criterion, **kwargs)
+            return PoseNet(parameters, criterion, **kwargs)
         else:
             raise ValueError("Unknown model name: {}".format(parameters.name))
 

@@ -38,6 +38,11 @@ def quaternion_from_logq(logq):
     return kornia.quaternion_log_to_exp(logq)
 
 
+def logq_from_quaternion(quaternion):
+    logq = kornia.quaternion_exp_to_log(quaternion)
+    return logq
+
+
 def quaternion_angular_error(q1, q2):
     dot = torch.sum(q1 * q2, dim=1)
     d = torch.abs(dot)
