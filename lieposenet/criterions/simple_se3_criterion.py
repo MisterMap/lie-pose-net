@@ -20,6 +20,7 @@ class SimpleSE3Criterion(BasePoseCriterion):
         self._translation_koef = Parameter(torch.tensor(translation_koef), requires_grad=koef_requires_grad)
         self._use_se3_translation = use_se3_translation
         self._loss = LOSS_TYPES[loss_type]()
+        print("Loss function ", self._loss)
 
     def forward(self, predicted_position, target_position):
         predicted_position = SE3Position.from_q_position(predicted_position)
