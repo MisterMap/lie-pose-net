@@ -92,7 +92,6 @@ class PoseNet(BaseLightningModule):
             quaternion_angular_error(predicted_position.q_rotation, target_position.q_rotation)
         )
         translation_error = mean_squared_error(predicted_position.translation, target_position.translation)
-        rotation_error = mean_squared_error(predicted_position.log_q_rotation, target_position.log_q_rotation)
         log_se3_delta = calculate_log_se3_delta(predicted_position, target_position)
         log_se3_translation_error = torch.mean(log_se3_delta[:, :3] ** 2)
         log_se3_rotation_error = torch.mean(log_se3_delta[:, 3:] ** 2)
@@ -102,7 +101,6 @@ class PoseNet(BaseLightningModule):
             "mean_translation": mean_translation_error,
             "mean_rotation": mean_rotation_error,
             "mse_translation": translation_error,
-            "mse_rotation": rotation_error,
             "mse_log_se3": log_se3_error,
             "mse_log_se3_rotation": log_se3_rotation_error,
             "mse_log_se3_translation": log_se3_translation_error

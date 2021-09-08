@@ -44,6 +44,11 @@ class TestPoseNet(unittest.TestCase):
         model = ModelFactory().make_model(self._params)
         self._trainer.fit(model, self._data_module)
 
+    def test_simple_se3_criterion_training(self):
+        self._params.criterion.name = "simple_se3"
+        model = ModelFactory().make_model(self._params)
+        self._trainer.fit(model, self._data_module)
+
     def test_testing(self):
         trainer = pl.Trainer(logger=TensorBoardLogger("lightning_logs"), max_epochs=1, gpus=1)
         model = ModelFactory().make_model(self._params)
