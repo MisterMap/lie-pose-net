@@ -26,8 +26,10 @@ class SimpleSE3Criterion(BasePoseCriterion):
         target_position = SE3Position.from_matrix_position(target_position)
         log_se3_delta = calculate_log_se3_delta(predicted_position, target_position)
         if self._use_se3_translation:
+            print("Use se3 translation")
             translation_part = log_se3_delta[:, :3]
         else:
+            print("Not use se3 translation")
             translation_part = predicted_position.translation - target_position.translation
         rotation_part = log_se3_delta[:, 3:]
         return self.calculate_weighted_loss(translation_part, rotation_part)

@@ -40,7 +40,7 @@ class MasterMlflowExperiment(object):
             print(parameter_setup)
             task = Task.create(
                 project_name=f"{self._project_name}",
-                task_name=f'remote_task',
+                task_name=self.make_task_name(parameter_setup),
                 repo=self._repo,
                 branch=self._branch,
                 script=self._script,
