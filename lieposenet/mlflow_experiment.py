@@ -21,6 +21,8 @@ DEFAULT_MODEL_PARAMS = AttributeDict(**{
         "name": "SE3Criterion",
         "rotation_koef": -3.0,
         "translation_koef": -3.0,
+        "use_se3_translation": True,
+        "loss_type": "l2",
     },
     "feature_dimension": 2048,
     "drop_rate": 0,
