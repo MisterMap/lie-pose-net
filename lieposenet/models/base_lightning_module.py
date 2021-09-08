@@ -69,3 +69,7 @@ class BaseLightningModule(pl.LightningModule):
             scheduler = torch.optim.lr_scheduler.StepLR(optimizer, **self.hparams.scheduler)
             return [optimizer], [scheduler]
         return optimizer
+
+    @property
+    def data_saver(self):
+        return self._data_saver
