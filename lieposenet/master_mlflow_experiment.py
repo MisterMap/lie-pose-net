@@ -27,6 +27,14 @@ class MasterMlflowExperiment(object):
                 parameter_setups[-1][key] = parameter
         return parameter_setups
 
+    @staticmethod
+    def make_task_name(parameter_setup):
+        name = "remote_task "
+        for key, value in parameter_setup.items():
+            truncated_key = key.split("/")[-1]
+            name = name + f"{truncated_key}={value},"
+        return name[:-1]
+
     def remote_run_experiment(self):
         for parameter_setup in self._parameter_setups:
             print(parameter_setup)

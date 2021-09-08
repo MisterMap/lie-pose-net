@@ -78,6 +78,7 @@ class MlFlowExperiment(object):
     def prepare_model(self):
         model_params = DEFAULT_MODEL_PARAMS
         self._task.connect(model_params)
+        print(model_params)
         return self._factory.make_from_parameters(model_params)
 
     def prepare_trainer(self):
