@@ -13,9 +13,8 @@ from ..utils.torch_se3_math import calculate_log_se3_delta
 
 class PoseNet(BaseLightningModule):
     def __init__(self, parameters, criterion, data_saver_path="trajectories.npy"):
-        super(PoseNet, self).__init__(parameters)
+        super(PoseNet, self).__init__(parameters, criterion)
 
-        self.criterion = criterion
         # replace the last FC layer in feature extractor
         self.feature_extractor = models.resnet34(pretrained=parameters.feature_extractor.pretrained)
         self.feature_extractor.avgpool = nn.AdaptiveAvgPool2d(1)

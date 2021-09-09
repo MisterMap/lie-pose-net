@@ -3,8 +3,9 @@ import torch
 
 
 class BaseLightningModule(pl.LightningModule):
-    def __init__(self, parameters):
+    def __init__(self, parameters, criterion):
         super().__init__()
+        self.criterion = criterion
         self.save_hyperparameters(parameters)
         self._data_saver = None
 
@@ -64,7 +65,18 @@ class BaseLightningModule(pl.LightningModule):
             beta1 = float(self.hparams.optimizer.betas.split(" ")[0])
             beta2 = float(self.hparams.optimizer.betas.split(" ")[1])
             self.hparams.optimizer.betas = (beta1, beta2)
-        optimizer = torch.optim.Adam(self.parameters(), **self.hparams.optimizer)
+        if self.criterion.lr is not None:
+            criterion_parameters = self.criterion.parameters()
+            other_parameters = set(self.parameters()) - set(criterion_parameters)
+            learning_parameters = [
+                {"params": list(other_parameters)},
+                {"params": list(criterion_parameters), "lr": self.criterion.lr}
+            ]
+            print(learning_parameters)
+        else:
+            learning_parameters = self.parameters()
+        print(learning_parameters)
+        optimizer = torch.optim.Adam(learning_parameters, **self.hparams.optimizer)
         if "scheduler" in self.hparams.keys():
             scheduler = torch.optim.lr_scheduler.StepLR(optimizer, **self.hparams.scheduler)
             return [optimizer], [scheduler]

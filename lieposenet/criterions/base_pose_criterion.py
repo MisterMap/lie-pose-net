@@ -4,6 +4,10 @@ from ..utils.se3_position import SE3Position
 
 
 class BasePoseCriterion(nn.Module):
+    def __init__(self, lr=None):
+        super().__init__()
+        self.lr = lr
+
     @property
     def position_dimension(self):
         raise NotImplementedError

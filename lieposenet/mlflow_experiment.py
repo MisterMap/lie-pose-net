@@ -23,7 +23,8 @@ DEFAULT_MODEL_PARAMS = AttributeDict(**{
         "translation_koef": -3.0,
         "use_se3_translation": True,
         "loss_type": "l2",
-        "koef_requires_grad": True
+        "koef_requires_grad": True,
+        "lr": 0.0001
     },
     "feature_dimension": 2048,
     "drop_rate": 0,
