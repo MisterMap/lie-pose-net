@@ -28,6 +28,7 @@ class TestPoseNet(unittest.TestCase):
             ),
             criterion=AttributeDict(
                 name="PoseNetCriterion",
+                lr=0.1,
             ),
             feature_dimension=2048,
             drop_rate=0.5,
@@ -46,11 +47,11 @@ class TestPoseNet(unittest.TestCase):
         self._trainer.test(model, self._data_module.test_dataloader())
 
     def test_training_se3_criterion(self):
-        model = self._factory.make_from_parameters(self._params)
         self._params.criterion.name = "SimpleSE3Criterion"
+        model = self._factory.make_from_parameters(self._params)
         self._trainer.fit(model, self._data_module)
 
     def test_testing_se3_criterion(self):
-        model = self._factory.make_from_parameters(self._params)
         self._params.criterion.name = "SimpleSE3Criterion"
+        model = self._factory.make_from_parameters(self._params)
         self._trainer.test(model, self._data_module.test_dataloader())

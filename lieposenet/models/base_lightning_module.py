@@ -66,16 +66,14 @@ class BaseLightningModule(pl.LightningModule):
             beta2 = float(self.hparams.optimizer.betas.split(" ")[1])
             self.hparams.optimizer.betas = (beta1, beta2)
         if self.criterion.lr is not None:
-            criterion_parameters = self.criterion.parameters()
+            criterion_parameters = list(self.criterion.parameters())
             other_parameters = set(self.parameters()) - set(criterion_parameters)
             learning_parameters = [
                 {"params": list(other_parameters)},
                 {"params": list(criterion_parameters), "lr": self.criterion.lr}
             ]
-            print(learning_parameters)
         else:
             learning_parameters = self.parameters()
-        print(learning_parameters)
         optimizer = torch.optim.Adam(learning_parameters, **self.hparams.optimizer)
         if "scheduler" in self.hparams.keys():
             scheduler = torch.optim.lr_scheduler.StepLR(optimizer, **self.hparams.scheduler)
